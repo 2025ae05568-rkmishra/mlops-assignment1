@@ -1,0 +1,7 @@
+{
+  "captured_at": "2026-10-11T17:01:10.613929+00:00",
+  "diagnostic_log_retained": true,
+  "downstream_step_blocked": true,
+  "scope": "local verification of the CI shell failure semantics; not a remote GitHub Actions run",
+  "test_exit_code": 1
+}

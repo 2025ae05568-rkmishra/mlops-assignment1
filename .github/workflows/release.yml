@@ -1,0 +1,46 @@
+name: Package verified local-deployment release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MPLCONFIGDIR: /tmp/mlops-matplotlib
+      MLFLOW_DISABLE_AGENT_HINT: "1"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Verify, train and test
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports/evidence/runtime
+          make setup verify 2>&1 | tee reports/evidence/runtime/release.log
+      - name: Build the same selected model into a release image
+        shell: bash
+        run: |
+          set -euo pipefail
+          make docker-build docker-smoke IMAGE=heart-disease-api:${{ github.sha }} 2>&1 | tee reports/evidence/runtime/docker.log
+          docker save heart-disease-api:${{ github.sha }} | gzip > artifacts/heart-disease-api.tar.gz
+          sha256sum artifacts/heart-disease-api.tar.gz > artifacts/heart-disease-api.tar.gz.sha256
+      - name: Export immutable release and diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            artifacts/heart-disease-api.tar.gz*
+            artifacts/release.json
+            artifacts/model/current/
+            reports/
+            data/manifests/
+            mlflow.db
+            mlruns/
+          retention-days: 90

@@ -1,0 +1,27 @@
+{
+  "title": "Cleveland API Operations",
+  "window_seconds": 300,
+  "step_seconds": 5,
+  "panels": [
+    {
+      "title": "Request rate",
+      "unit": "requests/s",
+      "query": "sum(rate(http_requests_total{route=\"/predict\"}[1m]))"
+    },
+    {
+      "title": "Error rate",
+      "unit": "errors/s",
+      "query": "sum(rate(http_requests_total{route=\"/predict\",status=~\"4..|5..\"}[1m]))"
+    },
+    {
+      "title": "Inference p95",
+      "unit": "seconds",
+      "query": "histogram_quantile(0.95, sum by (le) (rate(model_inference_duration_seconds_bucket[1m])))"
+    },
+    {
+      "title": "Ready model replicas",
+      "unit": "replicas",
+      "query": "sum(model_loaded)"
+    }
+  ]
+}

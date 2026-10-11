@@ -1,0 +1,17 @@
+{
+  "captured_at": "2026-10-11T17:06:59.842188+00:00",
+  "image_id": "sha256:5fcc9ca724c212ff0d1b92faf8171dda9bdd0be8116f8de2fa43d55367b51457",
+  "invalid_status": 422,
+  "model_version": "89efaf648946003baebe-35dd585e",
+  "read_only_root": true,
+  "user": "10001",
+  "valid_response": {
+    "confidence": 0.774472816145244,
+    "model_version": "89efaf648946003baebe-35dd585e",
+    "positive_class_probability": 0.22552718385475598,
+    "prediction": 0,
+    "request_id": "43f80f45-1d24-4049-8ed2-8869bdda3ada",
+    "schema_version": "1.0",
+    "threshold": 0.5
+  }
+}

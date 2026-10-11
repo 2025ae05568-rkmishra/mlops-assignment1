@@ -1,0 +1,3 @@
+# Student demonstration outline
+
+Record a concise actual pipeline demonstration; the PDF sets no exact duration. Identify repository and model version; explain real source/cleaning and training-only EDA; compare CV runs in MLflow; explain selected hyperparameters and held-out limitations; show automated tests and CI; demonstrate isolated Docker serving; inspect actual pods/Service/Ingress; send synthetic valid and invalid requests via Traefik; show dashboard graphs and sanitized logs. Explain model lineage, confidence and own design choices. Do not present scripted intentions as completed execution.

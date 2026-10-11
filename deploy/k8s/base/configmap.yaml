@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: heart-disease-config
+data:
+  MODEL_BUNDLE: /app/model
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"

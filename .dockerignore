@@ -1,0 +1,10 @@
+*
+!Dockerfile
+!requirements.txt
+!src/
+!src/**
+!artifacts/
+!artifacts/model/
+!artifacts/model/current/
+!artifacts/model/current/**
+**/__pycache__/

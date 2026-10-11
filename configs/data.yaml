@@ -1,0 +1,8 @@
+source_url: https://archive.ics.uci.edu/static/public/45/heart+disease.zip
+source_member: processed.cleveland.data
+source_page: https://archive.ics.uci.edu/dataset/45/heart+disease
+license: CC BY 4.0
+citation: "Janosi, A., Steinbrunn, W., Pfisterer, M., & Detrano, R. (1989). Heart Disease. UCI. https://doi.org/10.24432/C52P4X"
+seed: 42
+test_size: 0.2
+folds: 5

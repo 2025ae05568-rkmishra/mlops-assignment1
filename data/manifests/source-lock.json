@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "b17cd273da9ce1caa4710fce80227ea454d4dbf9fcbc8e6a9121672751563adc",
+  "byte_count": 18461,
+  "citation": "Janosi, A., Steinbrunn, W., Pfisterer, M., & Detrano, R. (1989). Heart Disease. UCI. https://doi.org/10.24432/C52P4X",
+  "folds": 5,
+  "license": "CC BY 4.0",
+  "member_sha256": "a74b7efa387bc9d108d7d0115d831fe9b414b29ae7124f331b622b4efa0427c8",
+  "retrieved_at": "2026-10-11T16:40:33.729911+00:00",
+  "seed": 42,
+  "source_member": "processed.cleveland.data",
+  "source_page": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+  "source_url": "https://archive.ics.uci.edu/static/public/45/heart+disease.zip",
+  "test_size": 0.2
+}
