@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-10-11T17:06:59.842188+00:00",
-  "image_id": "sha256:5fcc9ca724c212ff0d1b92faf8171dda9bdd0be8116f8de2fa43d55367b51457",
+  "captured_at": "2026-10-12T02:26:38.414392+00:00",
+  "image_id": "sha256:ecd357927c128f580ac2d2d6c25409cd705d47fccd68b23161ebc227134c6435",
   "invalid_status": 422,
   "model_version": "89efaf648946003baebe-35dd585e",
   "read_only_root": true,
@@ -10,7 +10,7 @@
     "model_version": "89efaf648946003baebe-35dd585e",
     "positive_class_probability": 0.22552718385475598,
     "prediction": 0,
-    "request_id": "43f80f45-1d24-4049-8ed2-8869bdda3ada",
+    "request_id": "47447b4b-f8df-47f4-931b-a040ae96d14d",
     "schema_version": "1.0",
     "threshold": 0.5
   }

@@ -8,6 +8,8 @@ __pycache__/
 htmlcov/
 .DS_Store
 .env
+MLOps Assignment 1 Instructions.pdf
+BITS_AIMLCZG523_Assignment_1_Architecture_and_Design.md
 data/raw/
 artifacts/
 mlruns/
