@@ -11,10 +11,11 @@ Technical stages and final assignment submission are distinct. Check actual outp
 - [x] Local Kubernetes Ingress prediction and deployment evidence verified.
 - [x] Dashboard screenshot, API request logs and per-pod scrape evidence captured.
 - [x] Existing GitHub origin URL identified: https://github.com/rmishra3261/2025ae05568-mlops.
-- [ ] Implementation committed/pushed and reviewer permissions verified.
-- [ ] GitHub Actions runs executed remotely, with screenshots and failure diagnostics.
-- [ ] Student-reviewed final 10-page PDF report with setup, EDA/modeling, experiment summary, rendered architecture, workflow/deployment screenshots and repository link.
+- [x] Implementation committed/pushed as e1710cb; public GitHub repository accessible.
+- [x] GitHub Actions run 38159803218 passed; screenshot and artifact verified. Local failure diagnostics retained (no remote failure run claimed).
+- [x] Ten-page PDF generated with setup, results, architecture, CI screenshot, monitoring charts and repository links.
+- [ ] Student review of the final PDF completed.
 - [ ] Short overall-pipeline video recorded and accessible.
 - [ ] Individual originality/understanding review completed.
 
-Cloud provisioning is optional; local access instructions satisfy the selected deployment path. No public cloud URL or remote GitHub execution has been claimed.
+Cloud provisioning is optional; local access instructions satisfy the selected deployment path. Remote GitHub CI is verified. No public cloud URL is claimed.
