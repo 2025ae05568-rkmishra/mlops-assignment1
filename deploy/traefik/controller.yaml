@@ -1,0 +1,144 @@
+# Standard Kubernetes Ingress provider; no Minikube addon, Helm or CRDs required.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mlops-traefik
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mlops-traefik-discovery
+rules:
+  - apiGroups: [""]
+    resources: [nodes]
+    verbs: [get, list, watch]
+  - apiGroups: [networking.k8s.io]
+    resources: [ingressclasses]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mlops-traefik-discovery
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mlops-traefik-discovery
+subjects:
+  - kind: ServiceAccount
+    name: mlops-traefik
+    namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mlops-traefik-routing
+  namespace: mlops-assignment
+rules:
+  - apiGroups: [""]
+    resources: [services, endpoints, secrets]
+    verbs: [get, list, watch]
+  - apiGroups: [discovery.k8s.io]
+    resources: [endpointslices]
+    verbs: [get, list, watch]
+  - apiGroups: [networking.k8s.io]
+    resources: [ingresses]
+    verbs: [get, list, watch]
+  - apiGroups: [networking.k8s.io]
+    resources: [ingresses/status]
+    verbs: [update]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mlops-traefik-routing
+  namespace: mlops-assignment
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mlops-traefik-routing
+subjects:
+  - kind: ServiceAccount
+    name: mlops-traefik
+    namespace: kube-system
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: traefik
+spec:
+  controller: traefik.io/ingress-controller
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlops-traefik
+  template:
+    metadata:
+      labels:
+        app: mlops-traefik
+    spec:
+      serviceAccountName: mlops-traefik
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: traefik
+          image: traefik:v3.6.25
+          args:
+            - --providers.kubernetesingress=true
+            - --providers.kubernetesingress.namespaces=mlops-assignment
+            - --providers.kubernetesingress.ingressclass=traefik
+            - --entrypoints.web.address=:8000
+            - --entrypoints.health.address=:8080
+            - --ping=true
+            - --ping.entrypoint=health
+            - --log.level=INFO
+          ports:
+            - name: web
+              containerPort: 8000
+            - name: health
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: health
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: health
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  type: LoadBalancer
+  selector:
+    app: mlops-traefik
+  ports:
+    - name: web
+      port: 8081
+      targetPort: web
