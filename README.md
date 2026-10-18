@@ -4,7 +4,7 @@ This repository contains an end-to-end MLOps assignment using the UCI processed 
 
 Repository: <https://github.com/2025ae05568-rkmishra/mlops-assignment1>
 
-> **Submission workflow:** Follow the BITS deployment and access sequence below. The selected target is BITS, and the final report uses its captured release. The repository retains the selected BITS evidence.
+> **Submission workflow:** Its using Minikube cluster for deployment which can be done locally or in any cloud provider. Assignment was done in BITS so to follow the BITS deployment and access sequence below:
 
 **Final submission:** [Ten-page BITS report](output/pdf/2025ae05568-mlops-final-report.pdf), [validated VM evidence and selected screenshots](reports/evidence/bits/README.md), [local API access instructions](reports/evidence/bits/reviewer-access.md), and the separately submitted `2025ae05568-mlops.mp4`. The report uses release run **39107510102**.
 
