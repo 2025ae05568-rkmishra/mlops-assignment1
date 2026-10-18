@@ -33,4 +33,4 @@ The original `release.json` retains the capture script's SSH access label. Actua
 
 ## Report and video
 
-The [completed ten-page report](../../../2025ae05568-mlops-final-report.pdf) is provided as a PDF at the repository root.
+The [completed ten-page report](../../../2025ae05568-mlops-final-report.pdf) is provided as a PDF at the repository root. Video is submitted separately.
