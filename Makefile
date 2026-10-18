@@ -2,16 +2,13 @@
 PYTHON ?= python3.11
 PY := .venv/bin/python
 IMAGE ?= heart-disease-api:$(shell $(PY) scripts/image_tag.py)
-EVIDENCE_DIR ?=
-VIDEO_URL ?=
-VIDEO_FILE ?=
 API_URL ?= http://127.0.0.1:8000
 export MPLCONFIGDIR := /tmp/mlops-matplotlib
 export OMP_NUM_THREADS := 1
 export OPENBLAS_NUM_THREADS := 1
 export MLFLOW_DISABLE_AGENT_HINT := 1
 
-.PHONY: help setup data eda train evaluate package lint unit integration test verify serve mlflow docker-build docker-smoke deploy-minikube smoke dashboard evidence report
+.PHONY: help setup data eda train package lint unit integration test verify serve mlflow docker-build docker-smoke deploy-minikube smoke dashboard evidence vm-access
 help:
 	@echo "setup -> data -> eda -> train -> package -> test -> docker-build -> docker-smoke -> deploy-minikube"
 setup:
@@ -24,8 +21,6 @@ eda: data
 	$(PY) -m heart_disease.data.eda
 train: eda
 	$(PY) -m heart_disease.models.train
-evaluate:
-	$(PY) scripts/show_evaluation.py
 package:
 	$(PY) -m heart_disease.models.package
 lint:
@@ -53,11 +48,5 @@ dashboard:
 	$(PY) scripts/monitoring_dashboard.py
 evidence:
 	$(PY) scripts/collect_evidence.py
-report:
-	$(PY) scripts/build_final_report.py $(if $(EVIDENCE_DIR),--evidence-dir "$(EVIDENCE_DIR)") $(if $(VIDEO_URL),--video-url "$(VIDEO_URL)") $(if $(VIDEO_FILE),--video-file "$(VIDEO_FILE)")
-
-.PHONY: report-draft vm-access
-report-draft:
-	$(PY) scripts/build_final_report.py --draft
 vm-access:
 	bash scripts/open_vm_access.sh

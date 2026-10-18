@@ -47,3 +47,22 @@ output/audio/
 /docs/deployment-bits.md
 /docs/model-card.md
 /docs/video-link.md
+/scripts/build_final_report.py
+
+# Optional authoring aids, duplicate notes and submission-review bookkeeping.
+/.env.example
+/docs/api.md
+/docs/architecture.md
+/notebooks/01_eda.ipynb
+/scripts/check_failure_gate.py
+/scripts/show_evaluation.py
+/reports/evidence/bits/final-audit.json
+/reports/evidence/bits/import.json
+/reports/evidence/bits/index.json
+/reports/evidence/bits/submission-manifest.json
+/reports/evidence/bits/screenshots/selection.json
+/reports/evidence/bits/data/
+/reports/evidence/bits/metrics/cv-comparison.csv
+/reports/evidence/bits/figures/categories.png
+/reports/evidence/bits/figures/missingness.csv
+/reports/evidence/bits/figures/precision_recall_curve.png

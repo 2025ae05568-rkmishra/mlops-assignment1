@@ -147,7 +147,7 @@ Replace `USER@VM` with your actual BITS SSH destination and use its required VPN
 
 Press **Ctrl-C** in the VM script terminal to stop its access processes. The Kubernetes deployment remains running. Troubleshooting logs are under `reports/evidence/runtime/access/`.
 
-### Capture evidence and build the report
+### Capture evidence and submit the report
 
 The deployment runner automatically calls `scripts/capture_submission.py`; you do not normally run it manually. Find the selected evidence directory with:
 
@@ -155,13 +155,9 @@ The deployment runner automatically calls `scripts/capture_submission.py`; you d
 cat reports/evidence/runtime/latest-submission.txt
 ```
 
-Add current-release screenshots (`ci.png`, `ci-artifact.png`, `mlflow.png`, `deployment.png`, `monitoring.png`) to that directory's `screenshots/` folder, and add your demonstrated access instructions as `reviewer-access.md`. The selected evidence has already been transferred to `reports/evidence/bits`. To rebuild this report on the Mac using the existing separately submitted video:
+Add current-release screenshots (`ci.png`, `ci-artifact.png`, `mlflow.png`, `deployment.png`, `monitoring.png`) to that directory's `screenshots/` folder, and add your demonstrated access instructions as `reviewer-access.md`. The selected submission evidence has already been transferred to `reports/evidence/bits`.
 
-```bash
-make report EVIDENCE_DIR=reports/evidence/bits VIDEO_FILE="$HOME/Documents/2025ae05568-mlops.mp4"
-```
-
-The final report is written to `output/pdf/2025ae05568-mlops-final-report.pdf`. It requires the captured BITS evidence, screenshots, access instructions and either a recording file (`VIDEO_FILE`) or hosted HTTPS link (`VIDEO_URL`). A hosted link is optional when the video is submitted as a file. Use `make report-draft` only for a visibly marked layout draft before the final inputs exist.
+The completed ten-page report is provided at `output/pdf/2025ae05568-mlops-final-report.pdf`. Submit that PDF and the separately exported recording. A hosted video link is optional when the video is submitted as a file. The evidence directory contains the metrics, figures, deployment checks and screenshots supporting the report.
 
 | New script | When it runs |
 |---|---|
@@ -169,7 +165,7 @@ The final report is written to `output/pdf/2025ae05568-mlops-final-report.pdf`. 
 | `scripts/capture_submission.py` | Called automatically by `scripts/run_lab_deployment.sh` to capture and validate release/VM evidence. |
 | `scripts/serve_release_mlflow.py` | Called automatically by `scripts/open_vm_access.sh` to show the downloaded release's experiments. |
 
-The screenshots should show the successful release job and downloadable artifact, selected MLflow parameters/metrics/artifacts, ready Kubernetes resources with valid/invalid Ingress responses, and a populated dashboard with both targets UP. Export evidence before stopping or replacing the VM; monitoring history is ephemeral. Package it from the VM repository root with `tar -czf ~/bits-evidence.tgz reports/evidence/runtime`. On the Mac, select the extracted snapshot directory explicitly; its copied runtime pointer still contains a VM-specific absolute path. For a new release's report, use `make report EVIDENCE_DIR="$(cat reports/evidence/runtime/latest-submission.txt)" VIDEO_FILE='/path/to/recording.mp4'` on the VM instead of selecting the archived submission snapshot.
+The screenshots should show the successful release job and downloadable artifact, selected MLflow parameters/metrics/artifacts, ready Kubernetes resources with valid/invalid Ingress responses, and a populated dashboard with both targets UP. Export evidence before stopping or replacing the VM; monitoring history is ephemeral. Package it from the VM repository root with `tar -czf ~/bits-evidence.tgz reports/evidence/runtime`. The copied runtime pointer contains a VM-specific absolute path; inspect the extracted snapshot directly on the Mac. A later deployment creates its own evidence and does not change the release documented in the submitted PDF.
 
 ### Pipeline video
 
@@ -196,7 +192,6 @@ make verify
 make data
 make eda
 make train
-make evaluate
 make package
 make test
 ```
@@ -269,7 +264,9 @@ In another terminal:
 make smoke
 ```
 
-API docs: <http://127.0.0.1:8000/docs>. `POST /predict` accepts the synthetic request in `tests/fixtures/valid_request.json` and returns the class, positive-class probability, confidence for the returned class, threshold, and model/schema versions. All 13 fields are required; only `ca` and `thal` may explicitly be null. Invalid input receives a sanitized HTTP 422 response. See [API contract](docs/api.md).
+API docs: <http://127.0.0.1:8000/docs>. `POST /predict` accepts the synthetic request in `tests/fixtures/valid_request.json` and returns the class, positive-class probability, confidence for the returned class, threshold, and model/schema versions. All 13 fields are required; only `ca` and `thal` may explicitly be null. Invalid input receives a sanitized HTTP 422 response.
+
+Confidence is `p` for a positive prediction and `1-p` for a negative prediction. Extra or missing fields, unknown category codes, numeric strings, Boolean substitutions and nonfinite numbers are rejected. Bodies larger than 16 KiB receive HTTP 413; an unavailable verified model receives 503. `/health` checks process liveness, `/ready` verifies model readiness, `/version` reports serving identity, and `/metrics` is internal-only. A request ID ties responses to structured logs.
 
 Build and test an isolated container after packaging:
 
@@ -280,13 +277,30 @@ make docker-smoke
 
 The Docker image contains the selected model and runs as UID 10001 with a read-only root filesystem and writable `/tmp`. The GitHub workflows also verify the model, tests, container build, and container smoke test.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  U[UCI pinned archive] --> C[Clean CSV and saved split]
+  C --> CV[Training-only pipeline CV]
+  CV --> M[MLflow comparison and selected model]
+  M --> B[Checksummed preprocessing and model bundle]
+  B --> D[GitHub CI and Docker serving proof]
+  D --> K[BITS Minikube API pods]
+  T[Traefik Ingress] --> K
+  K --> P[Per-pod Prometheus metrics]
+  P --> V[Private dashboard]
+```
+
+The API uses the fitted preprocessing/model pipeline and never trains during a request. GitHub Actions trains, tests and packages before container verification; the BITS VM deploys the verified release. The demonstrated access path is the authorized BITS remote desktop with a VM-local Traefik forward. Request logs and metrics describe service behavior.
+
 ## Assignment deliverables and evidence
 
 The assignment PDF asks for each item below. Paths point to the implementation/evidence in this repository:
 
 | Requirement | Implementation / evidence |
 |---|---|
-| Data acquisition, cleaning, missing-value handling, EDA visualizations | `src/heart_disease/data/`, `data/README.md`, `data/processed/cleaned.csv`, `data/manifests/`, `notebooks/01_eda.ipynb`, `reports/evidence/bits/figures/` |
+| Data acquisition, cleaning, missing-value handling, EDA visualizations | `src/heart_disease/data/`, `data/README.md`, `data/processed/cleaned.csv`, `data/manifests/`, `reports/evidence/bits/figures/` |
 | Feature engineering, at least two classifiers, tuning and CV metrics | `src/heart_disease/models/`, `configs/training.yaml`, `reports/evidence/bits/metrics/`, `reports/evidence/bits/manifest.json` |
 | Experiment tracking | `make mlflow`, `mlflow.db`, `mlruns/` |
 | Reusable model and clean requirements | `artifacts/model/` (generated), `requirements.txt`, `requirements-dev.txt` |
@@ -294,12 +308,12 @@ The assignment PDF asks for each item below. Paths point to the implementation/e
 | JSON prediction API and isolated container proof | `src/heart_disease/api/`, `Dockerfile`, `tests/fixtures/valid_request.json`, `make docker-smoke` |
 | Kubernetes deployment, Ingress, endpoint proof | `deploy/k8s/`, `scripts/deploy_minikube.sh`, `scripts/run_lab_deployment.sh`, `reports/evidence/bits/` |
 | Request logging and monitoring/dashboard | `src/heart_disease/api/`, `deploy/monitoring/`, `scripts/monitoring_dashboard.py`, `reports/evidence/bits/screenshots/monitoring.png` |
-| Setup, modeling, architecture, deployment and report | This README, `docs/architecture.md`, `make report` after BITS evidence capture |
+| Setup, modeling, architecture, deployment and report | This README and `output/pdf/2025ae05568-mlops-final-report.pdf` |
 | Local API access instructions and short pipeline video | [BITS access instructions](reports/evidence/bits/reviewer-access.md), pipeline video section above; MP4 submitted separately |
 
-The assignment permits **local Kubernetes** and local access instructions when the API is not public; paid cloud deployment and a public URL are not required for this chosen path. See the [architecture](docs/architecture.md) and [validated BITS evidence](reports/evidence/bits/README.md).
+The assignment permits **local Kubernetes** and local access instructions when the API is not public; paid cloud deployment and a public URL are not required for this chosen path. See the architecture above and [validated BITS evidence](reports/evidence/bits/README.md).
 
-The final report uses the BITS evidence in `reports/evidence/bits` and the completed video. The generator checks release consistency, required screenshots and access instructions before producing exactly ten pages. Submit the final PDF and existing MP4, commit/push the report and evidence, and verify the evaluator can access the deliverables and documented local testing path.
+The final ten-page report uses the BITS evidence in `reports/evidence/bits` and the completed video. Submit the final PDF and existing MP4, commit/push the report and evidence, and verify the evaluator can access the deliverables and documented local testing path.
 
 ## GitHub Actions
 
@@ -321,5 +335,3 @@ Stop any port-forward, dashboard, or tunnel terminals separately. `minikube dele
 ## Data attribution
 
 Janosi, A., Steinbrunn, W., Pfisterer, M., & Detrano, R. (1989). *Heart Disease*. UCI Machine Learning Repository. <https://doi.org/10.24432/C52P4X>. Licensed under CC BY 4.0. See [data provenance](data/README.md).
-
-Implementation and documentation were developed with Codex assistance. The student must review and understand the implementation and follow the course's academic integrity and assistance-disclosure rules.
