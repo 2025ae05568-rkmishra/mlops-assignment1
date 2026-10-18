@@ -16,7 +16,7 @@ The GitHub release workflow builds and smoke-tests the AMD64 application image. 
 
 ### Before starting
 
-Use a Rocky Linux 9 **x86_64/AMD64** VM with:
+Bits VM uses Rocky Linux, so for Rocky Linux 9 **x86_64/AMD64** VM with:
 
 - Git available to clone the repository, and Docker running and usable by your regular account.
 - Minikube installed; enough VM resources for a 4-CPU, 6-GiB Minikube profile.
