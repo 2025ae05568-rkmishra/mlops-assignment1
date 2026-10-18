@@ -33,4 +33,4 @@ The original `release.json` retains the capture script's SSH access label. Actua
 
 ## Report and video
 
-The [completed ten-page report](../../../output/pdf/2025ae05568-mlops-final-report.pdf) is provided as a PDF. Submit the existing `2025ae05568-mlops.mp4` separately with the coursework. The original model bundle, MLflow artifacts and container archive are available in the selected GitHub Actions release artifact for deployment reproduction.
+The [completed ten-page report](../../../2025ae05568-mlops-final-report.pdf) is provided as a PDF at the repository root.

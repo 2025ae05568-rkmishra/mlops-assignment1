@@ -6,7 +6,7 @@ Repository: <https://github.com/2025ae05568-rkmishra/mlops-assignment1>
 
 > **Submission workflow:** Its using Minikube cluster for deployment which can be done locally or in any cloud provider. Assignment was done in BITS so to follow the BITS deployment and access sequence below:
 
-**Final submission:** [Ten-page BITS report](output/pdf/2025ae05568-mlops-final-report.pdf), [validated VM evidence and selected screenshots](reports/evidence/bits/README.md), [local API access instructions](reports/evidence/bits/reviewer-access.md), and the separately submitted `2025ae05568-mlops.mp4`. The report uses release run **39107510102**.
+**Final submission:** [Ten-page BITS report](2025ae05568-mlops-final-report.pdf), [validated VM evidence and selected screenshots](reports/evidence/bits/README.md), [local API access instructions](reports/evidence/bits/reviewer-access.md), and the separately submitted `2025ae05568-mlops.mp4`. The report uses release run **39107510102**.
 
 ## Fast path: deploy on a Rocky Linux 9 BITS lab VM
 
@@ -157,7 +157,7 @@ cat reports/evidence/runtime/latest-submission.txt
 
 Add current-release screenshots (`ci.png`, `ci-artifact.png`, `mlflow.png`, `deployment.png`, `monitoring.png`) to that directory's `screenshots/` folder, and add your demonstrated access instructions as `reviewer-access.md`. The selected submission evidence has already been transferred to `reports/evidence/bits`.
 
-The completed ten-page report is provided at `output/pdf/2025ae05568-mlops-final-report.pdf`. Submit that PDF and the separately exported recording. A hosted video link is optional when the video is submitted as a file. The evidence directory contains the metrics, figures, deployment checks and screenshots supporting the report.
+The completed ten-page report is provided at the repository root as `2025ae05568-mlops-final-report.pdf`. Submit that PDF and the separately exported recording. A hosted video link is optional when the video is submitted as a file. The evidence directory contains the metrics, figures, deployment checks and screenshots supporting the report.
 
 | New script | When it runs |
 |---|---|
@@ -308,7 +308,7 @@ The assignment PDF asks for each item below. Paths point to the implementation/e
 | JSON prediction API and isolated container proof | `src/heart_disease/api/`, `Dockerfile`, `tests/fixtures/valid_request.json`, `make docker-smoke` |
 | Kubernetes deployment, Ingress, endpoint proof | `deploy/k8s/`, `scripts/deploy_minikube.sh`, `scripts/run_lab_deployment.sh`, `reports/evidence/bits/` |
 | Request logging and monitoring/dashboard | `src/heart_disease/api/`, `deploy/monitoring/`, `scripts/monitoring_dashboard.py`, `reports/evidence/bits/screenshots/monitoring.png` |
-| Setup, modeling, architecture, deployment and report | This README and `output/pdf/2025ae05568-mlops-final-report.pdf` |
+| Setup, modeling, architecture, deployment and report | This README and `2025ae05568-mlops-final-report.pdf` |
 | Local API access instructions and short pipeline video | [BITS access instructions](reports/evidence/bits/reviewer-access.md), pipeline video section above; MP4 submitted separately |
 
 The assignment permits **local Kubernetes** and local access instructions when the API is not public; paid cloud deployment and a public URL are not required for this chosen path. See the architecture above and [validated BITS evidence](reports/evidence/bits/README.md).
