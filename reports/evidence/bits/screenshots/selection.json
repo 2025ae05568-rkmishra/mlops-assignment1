@@ -1,0 +1,93 @@
+[
+  {
+    "file": "mlflow.png",
+    "source": "mlflow-bits.png",
+    "source_sha256": "3ec440d623c48481396d1bd6f317455a56ff6867b25d7c9fd7c0b0b6d0fb0dc7",
+    "crop": [
+      175,
+      140,
+      1685,
+      825
+    ],
+    "notes": "Selected model metrics, parameters and run identity."
+  },
+  {
+    "file": "monitoring.png",
+    "source": "Screenshot 2026-10-18 at 2.03.17\u202fPM.png",
+    "source_sha256": "950edefcc331f7c185df0b433ac45e8c2279d5cae119b7fbb0dec83f46f7fee4",
+    "crop": [
+      10,
+      135,
+      860,
+      858
+    ],
+    "notes": "Includes page title, both UP scrape targets and all four populated panels; screenshot follows later manual traffic."
+  },
+  {
+    "file": "deployment.png",
+    "source": "Screenshot 2026-10-18 at 2.25.14\u202fPM.png",
+    "source_sha256": "5cb660437ccdbc53beef9d3868aa95a9e827cfbe12a63e967c0b03e125b3cf1b",
+    "crop": [
+      32,
+      110,
+      1710,
+      820
+    ],
+    "notes": "Successful deployment summary and valid/invalid Ingress response."
+  },
+  {
+    "file": "api-smoke.png",
+    "source": "Screenshot 2026-10-18 at 1.55.46\u202fPM.png",
+    "source_sha256": "57f9385dc5a7ec350ee8672623c099765cdd22cfe74321e3ed30bf89fda9b65e",
+    "crop": [
+      4,
+      76,
+      1318,
+      474
+    ],
+    "notes": "Valid prediction and expected HTTP 422; additional 60-second manual traffic."
+  },
+  {
+    "file": "kubernetes.png",
+    "source": "Screenshot 2026-10-18 at 4.18.02\u202fPM.png",
+    "source_sha256": "4d2f89e02d5d7a831aaa6498c706ff9d91621c94332b28dcc8622baebb6d0468",
+    "crop": null,
+    "notes": "Original resource screenshot retained, including earlier malformed kubectl command and subsequent successful resource queries."
+  },
+  {
+    "file": "mlflow-artifacts.png",
+    "source": "Screenshot 2026-10-18 at 2.14.54\u202fPM.png",
+    "source_sha256": "29e453f3f316a5e2aecfcae7343562537a2c73bf53b2d95526296d83b92d90ca",
+    "crop": [
+      192,
+      180,
+      1688,
+      845
+    ],
+    "notes": "Serving bundle file tree and manifest link model version to selected release."
+  },
+  {
+    "file": "ci.png",
+    "source": "bits-video-120.png",
+    "source_sha256": "c1ccec4d431c075684019a2134577c3c1728462a86c59ef35d09e8c310e4b76c",
+    "crop": [
+      455,
+      210,
+      1752,
+      881
+    ],
+    "notes": "Genuine original recording frame at 02:00: successful job and Docker smoke output."
+  },
+  {
+    "file": "ci-artifact.png",
+    "source": "bits-video-660.png",
+    "source_sha256": "7f1481220c8b049c036c56328c65cf0d7e8e3d8a57ed78aa590a1259f9171a98",
+    "crop": [
+      455,
+      530,
+      1752,
+      733
+    ],
+    "notes": "Genuine original recording frame at 11:00: release artifact entry."
+  }
+]

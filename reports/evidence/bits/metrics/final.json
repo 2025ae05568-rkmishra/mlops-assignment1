@@ -1,0 +1,34 @@
+{
+  "selected_cv": {
+    "candidate": 2,
+    "family": "logistic_regression",
+    "mean_accuracy": 0.8267006802721089,
+    "mean_average_precision": 0.9017361220594214,
+    "mean_f1": 0.805077519379845,
+    "mean_precision": 0.8378763322497338,
+    "mean_recall": 0.7849802371541503,
+    "mean_roc_auc": 0.9110452349582785,
+    "params": {
+      "C": 0.1,
+      "class_weight": "balanced"
+    },
+    "run_id": "a6d3c443af1f44709aa9aa0fe2c33cb6",
+    "std_accuracy": 0.03720235665694058,
+    "std_average_precision": 0.05562262351068188,
+    "std_f1": 0.04347351512860631,
+    "std_precision": 0.06867397225936546,
+    "std_recall": 0.08299830584971248,
+    "std_roc_auc": 0.030478590517862465
+  },
+  "selection_reason": "Logistic Regression within configured ROC-AUC tolerance of best",
+  "test": {
+    "accuracy": 0.8852459016393442,
+    "average_precision": 0.9622457205650482,
+    "f1": 0.8813559322033898,
+    "precision": 0.8387096774193549,
+    "recall": 0.9285714285714286,
+    "roc_auc": 0.9653679653679654
+  },
+  "test_n": 61,
+  "train_n": 242
+}

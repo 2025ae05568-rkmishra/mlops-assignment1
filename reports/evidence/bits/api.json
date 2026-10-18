@@ -1,0 +1,31 @@
+{
+  "captured_at": "2026-10-18T08:18:08.549691+00:00",
+  "host": "heart-disease.test",
+  "invalid_status": 422,
+  "metrics_status": 404,
+  "prediction": {
+    "confidence": 0.7744728161452442,
+    "model_version": "8bb3330d56912ab6edad-54110720",
+    "positive_class_probability": 0.22552718385475576,
+    "prediction": 0,
+    "request_id": "fb23c8f4-ec1a-4d46-a92c-34325cadb45a",
+    "schema_version": "1.0",
+    "threshold": 0.5
+  },
+  "ready": {
+    "model_version": "8bb3330d56912ab6edad-54110720",
+    "status": "ready"
+  },
+  "traffic_counts": {
+    "200": 57,
+    "422": 57
+  },
+  "traffic_seconds": 30,
+  "url": "http://127.0.0.1:8081",
+  "version": {
+    "code_hash": "8969b13a4b6af7fb9471e9c7cd4613980a24f281e220213853fd3c14c7492379",
+    "commit": "ae005d121706927a0d7956126c87bf5c85ada6c0",
+    "model_version": "8bb3330d56912ab6edad-54110720",
+    "schema_version": "1.0"
+  }
+}

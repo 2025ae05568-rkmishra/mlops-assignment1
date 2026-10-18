@@ -4,8 +4,11 @@ image="${1:-heart-disease-api:$(.venv/bin/python scripts/image_tag.py)}"
 context=mlops-assignment
 minikube status -p "$context"
 if ! kubectl --context "$context" -n kube-system get deployment traefik >/dev/null 2>&1; then
-  minikube -p "$context" addons enable traefik
+  printf 'Installing Traefik in the existing cluster from repository manifests.\n'
+  kubectl --context "$context" apply -f deploy/k8s/base/namespace.yaml
+  kubectl --context "$context" apply -f deploy/traefik/controller.yaml
 fi
+kubectl --context "$context" -n kube-system rollout status deployment/traefik --timeout=300s
 kubectl --context "$context" get ingressclass traefik
 .venv/bin/python scripts/configure_traefik_ports.py
 minikube -p "$context" image load "$image"

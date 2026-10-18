@@ -1,0 +1,177 @@
+{
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": {
+        "annotations": {
+            "deployment.kubernetes.io/revision": "1",
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"apps/v1\",\"kind\":\"Deployment\",\"metadata\":{\"annotations\":{},\"labels\":{\"app\":\"heart-disease-api\"},\"name\":\"heart-disease-api\",\"namespace\":\"mlops-assignment\"},\"spec\":{\"progressDeadlineSeconds\":300,\"replicas\":2,\"revisionHistoryLimit\":3,\"selector\":{\"matchLabels\":{\"app\":\"heart-disease-api\"}},\"strategy\":{\"rollingUpdate\":{\"maxSurge\":1,\"maxUnavailable\":0},\"type\":\"RollingUpdate\"},\"template\":{\"metadata\":{\"annotations\":{\"prometheus.io/port\":\"8000\",\"prometheus.io/scrape\":\"true\"},\"labels\":{\"app\":\"heart-disease-api\"}},\"spec\":{\"automountServiceAccountToken\":false,\"containers\":[{\"envFrom\":[{\"configMapRef\":{\"name\":\"heart-disease-config\"}}],\"image\":\"heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0-39107510102-1\",\"imagePullPolicy\":\"IfNotPresent\",\"livenessProbe\":{\"httpGet\":{\"path\":\"/health\",\"port\":\"http\"},\"periodSeconds\":10},\"name\":\"api\",\"ports\":[{\"containerPort\":8000,\"name\":\"http\"}],\"readinessProbe\":{\"httpGet\":{\"path\":\"/ready\",\"port\":\"http\"},\"periodSeconds\":5},\"resources\":{\"limits\":{\"cpu\":\"1\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"250m\",\"memory\":\"256Mi\"}},\"securityContext\":{\"allowPrivilegeEscalation\":false,\"capabilities\":{\"drop\":[\"ALL\"]},\"readOnlyRootFilesystem\":true},\"startupProbe\":{\"failureThreshold\":24,\"httpGet\":{\"path\":\"/ready\",\"port\":\"http\"},\"periodSeconds\":5},\"volumeMounts\":[{\"mountPath\":\"/tmp\",\"name\":\"tmp\"}]}],\"securityContext\":{\"fsGroup\":10001,\"runAsNonRoot\":true,\"runAsUser\":10001,\"seccompProfile\":{\"type\":\"RuntimeDefault\"}},\"terminationGracePeriodSeconds\":30,\"volumes\":[{\"emptyDir\":{\"sizeLimit\":\"128Mi\"},\"name\":\"tmp\"}]}}}}\n"
+        },
+        "creationTimestamp": "2026-10-18T08:17:05Z",
+        "generation": 1,
+        "labels": {
+            "app": "heart-disease-api"
+        },
+        "name": "heart-disease-api",
+        "namespace": "mlops-assignment",
+        "resourceVersion": "5981",
+        "uid": "a464bdf0-3e32-4528-b86a-4e487282b7f1"
+    },
+    "spec": {
+        "progressDeadlineSeconds": 300,
+        "replicas": 2,
+        "revisionHistoryLimit": 3,
+        "selector": {
+            "matchLabels": {
+                "app": "heart-disease-api"
+            }
+        },
+        "strategy": {
+            "rollingUpdate": {
+                "maxSurge": 1,
+                "maxUnavailable": 0
+            },
+            "type": "RollingUpdate"
+        },
+        "template": {
+            "metadata": {
+                "annotations": {
+                    "prometheus.io/port": "8000",
+                    "prometheus.io/scrape": "true"
+                },
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "heart-disease-api"
+                }
+            },
+            "spec": {
+                "automountServiceAccountToken": false,
+                "containers": [
+                    {
+                        "envFrom": [
+                            {
+                                "configMapRef": {
+                                    "name": "heart-disease-config"
+                                }
+                            }
+                        ],
+                        "image": "heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0-39107510102-1",
+                        "imagePullPolicy": "IfNotPresent",
+                        "livenessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/health",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "name": "api",
+                        "ports": [
+                            {
+                                "containerPort": 8000,
+                                "name": "http",
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/ready",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 5,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "resources": {
+                            "limits": {
+                                "cpu": "1",
+                                "memory": "512Mi"
+                            },
+                            "requests": {
+                                "cpu": "250m",
+                                "memory": "256Mi"
+                            }
+                        },
+                        "securityContext": {
+                            "allowPrivilegeEscalation": false,
+                            "capabilities": {
+                                "drop": [
+                                    "ALL"
+                                ]
+                            },
+                            "readOnlyRootFilesystem": true
+                        },
+                        "startupProbe": {
+                            "failureThreshold": 24,
+                            "httpGet": {
+                                "path": "/ready",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 5,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/tmp",
+                                "name": "tmp"
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "fsGroup": 10001,
+                    "runAsNonRoot": true,
+                    "runAsUser": 10001,
+                    "seccompProfile": {
+                        "type": "RuntimeDefault"
+                    }
+                },
+                "terminationGracePeriodSeconds": 30,
+                "volumes": [
+                    {
+                        "emptyDir": {
+                            "sizeLimit": "128Mi"
+                        },
+                        "name": "tmp"
+                    }
+                ]
+            }
+        }
+    },
+    "status": {
+        "availableReplicas": 2,
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-10-18T08:17:15Z",
+                "lastUpdateTime": "2026-10-18T08:17:15Z",
+                "message": "Deployment has minimum availability.",
+                "reason": "MinimumReplicasAvailable",
+                "status": "True",
+                "type": "Available"
+            },
+            {
+                "lastTransitionTime": "2026-10-18T08:17:05Z",
+                "lastUpdateTime": "2026-10-18T08:17:15Z",
+                "message": "ReplicaSet \"heart-disease-api-7db6496f74\" has successfully progressed.",
+                "reason": "NewReplicaSetAvailable",
+                "status": "True",
+                "type": "Progressing"
+            }
+        ],
+        "observedGeneration": 1,
+        "readyReplicas": 2,
+        "replicas": 2,
+        "updatedReplicas": 2
+    }
+}

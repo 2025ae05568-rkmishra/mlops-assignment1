@@ -1,0 +1,11 @@
+NAME                                     READY   STATUS    RESTARTS     AGE   IP            NODE               NOMINATED NODE   READINESS GATES
+pod/heart-disease-api-7db6496f74-dr85r   1/1     Running   0            63s   10.244.0.13   mlops-assignment   <none>           <none>
+pod/heart-disease-api-7db6496f74-rnx92   1/1     Running   0            63s   10.244.0.14   mlops-assignment   <none>           <none>
+pod/prometheus-5fb88968fc-thb7r          1/1     Running   3 (6m ago)   56m   10.244.0.12   mlops-assignment   <none>           <none>
+
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SELECTOR
+service/heart-disease-api   ClusterIP   10.101.215.3    <none>        80/TCP     63s   app=heart-disease-api
+service/prometheus          ClusterIP   10.104.159.67   <none>        9090/TCP   56m   app=prometheus
+
+NAME                                          CLASS     HOSTS                ADDRESS   PORTS   AGE
+ingress.networking.k8s.io/heart-disease-api   traefik   heart-disease.test             80      63s

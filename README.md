@@ -6,7 +6,11 @@ Repository: <https://github.com/2025ae05568-rkmishra/mlops-assignment1>
 
 > **Submission workflow:** Follow [BITS VM submission and evidence capture](docs/deployment-bits.md). The selected target is BITS, and the final report must be built from its captured release. Historical workstation evidence is retained separately.
 
+**Final submission:** [Ten-page BITS report](output/pdf/2025ae05568-mlops-final-report.pdf), [validated VM evidence and selected screenshots](reports/evidence/bits/README.md), [local API access instructions](reports/evidence/bits/reviewer-access.md), and [recording details](docs/video-link.md). The report uses release run **39107510102**; the video is submitted separately as `2025ae05568-mlops.mp4`.
+
 ## Fast path: deploy on a Rocky Linux 9 BITS lab VM
+
+The deployment installs Traefik from repository Kubernetes manifests when no controller exists; it does not depend on the Minikube Traefik addon or require a Minikube upgrade. Existing controllers are reused.
 
 The GitHub release workflow builds and smoke-tests the AMD64 application image. The VM downloads that image and runs it in Minikube; it does not need to train or build the model locally.
 
@@ -128,13 +132,13 @@ The deployment runner automatically calls `scripts/capture_submission.py`; you d
 cat reports/evidence/runtime/latest-submission.txt
 ```
 
-Add the four current-release screenshots (`ci.png`, `mlflow.png`, `deployment.png`, `monitoring.png`) to that directory's `screenshots/` folder, and add your tested access instructions as `reviewer-access.md`. Record the pipeline and verify the video's sharing permissions. Then run on the VM:
+Add current-release screenshots (`ci.png`, `ci-artifact.png`, `mlflow.png`, `deployment.png`, `monitoring.png`) to that directory's `screenshots/` folder, and add your demonstrated access instructions as `reviewer-access.md`. The selected evidence has already been transferred to `reports/evidence/bits`. To rebuild this report on the Mac using the existing separately submitted video:
 
 ```bash
-make report VIDEO_URL='https://your-reviewer-accessible-recording-link'
+make report EVIDENCE_DIR=reports/evidence/bits VIDEO_FILE="$HOME/Documents/2025ae05568-mlops.mp4"
 ```
 
-The final report is written to `output/pdf/2025ae05568-mlops-final-report.pdf`. It requires the captured BITS evidence, screenshots, access instructions and recording link. Use `make report-draft` only for a visibly marked layout draft before the final inputs exist.
+The final report is written to `output/pdf/2025ae05568-mlops-final-report.pdf`. It requires the captured BITS evidence, screenshots, access instructions and either a recording file (`VIDEO_FILE`) or hosted HTTPS link (`VIDEO_URL`). A hosted link is optional when the video is submitted as a file. Use `make report-draft` only for a visibly marked layout draft before the final inputs exist.
 
 | New script | When it runs |
 |---|---|
@@ -166,7 +170,9 @@ make test
 
 The dataset archive and its member are SHA-256 pinned in `data/manifests/source-lock.json`. `make data` downloads the source if it is not cached, verifies its hashes, creates the cleaned dataset and deterministic split manifest, and fails if the upstream data changes. Do not silently regenerate the source lock.
 
-Preprocessing is part of the fitted cross-validation pipeline: median imputation for numeric features, mode imputation and one-hot encoding for categorical features, and scaling for Logistic Regression. A stratified 80/20 split and five shared training-only folds use seed 42. The search compares a DummyClassifier, six Logistic Regression configurations, and eighteen Random Forest configurations; model selection uses mean CV ROC-AUC with a 0.01 simplicity rule favoring Logistic Regression. The 0.5 threshold is fixed. Held-out test results do not drive tuning. See [training configuration](configs/training.yaml), [model card](docs/model-card.md), `reports/metrics/`, and `reports/figures/`.
+Preprocessing is part of the fitted cross-validation pipeline: median imputation for numeric features, mode imputation and one-hot encoding for categorical features, and scaling for Logistic Regression. A stratified 80/20 split and five shared training-only folds use seed 42. The search compares a DummyClassifier, six Logistic Regression configurations, and eighteen Random Forest configurations; model selection uses mean CV ROC-AUC with a 0.01 simplicity rule favoring Logistic Regression. The 0.5 threshold is fixed. Held-out test results do not drive tuning. See [training configuration](configs/training.yaml), [model card](docs/model-card.md), [selected BITS metrics](reports/evidence/bits/metrics/), and [selected BITS figures](reports/evidence/bits/figures/).
+
+New runs regenerate `reports/metrics/`, `reports/figures/` and runtime evidence as ignored working outputs. Submission results are preserved separately in `reports/evidence/bits/`; older Mac-generated results are excluded.
 
 MLflow records candidate parameters, metrics, artifacts, plots, and lineage in `mlflow.db` and `mlruns/`. The selected full preprocessing/model pipeline is packaged with checksums and schema information under `artifacts/model/`; those generated model and tracking files are git-ignored and should be exported when needed for durable evidence.
 
@@ -188,7 +194,7 @@ minikube start -p mlops-assignment --driver=docker --cpus=4 --memory=6144
 make deploy-minikube
 ```
 
-For the deployed local API's Traefik route, Prometheus access, and dashboard, follow [Minikube deployment and access](docs/deployment-minikube.md). `make docker-build` packages the current local model, so train/package first if no verified model bundle is present.
+For the deployed API's Traefik route, Prometheus access, and dashboard, follow [BITS deployment and access](docs/deployment-bits.md). `make docker-build` packages the current local model, so train/package first if no verified model bundle is present.
 
 ## API and Docker
 
@@ -221,20 +227,20 @@ The assignment PDF asks for each item below. Paths point to the implementation/e
 
 | Requirement | Implementation / evidence |
 |---|---|
-| Data acquisition, cleaning, missing-value handling, EDA visualizations | `src/heart_disease/data/`, `data/README.md`, `data/processed/cleaned.csv`, `data/manifests/`, `notebooks/01_eda.ipynb`, `reports/figures/` |
-| Feature engineering, at least two classifiers, tuning and CV metrics | `src/heart_disease/models/`, `configs/training.yaml`, `reports/metrics/`, `docs/model-card.md` |
+| Data acquisition, cleaning, missing-value handling, EDA visualizations | `src/heart_disease/data/`, `data/README.md`, `data/processed/cleaned.csv`, `data/manifests/`, `notebooks/01_eda.ipynb`, `reports/evidence/bits/figures/` |
+| Feature engineering, at least two classifiers, tuning and CV metrics | `src/heart_disease/models/`, `configs/training.yaml`, `reports/evidence/bits/metrics/`, `docs/model-card.md` |
 | Experiment tracking | `make mlflow`, `mlflow.db`, `mlruns/` |
 | Reusable model and clean requirements | `artifacts/model/` (generated), `requirements.txt`, `requirements-dev.txt` |
 | Unit tests and automated CI with logs/artifacts | `tests/`, `.github/workflows/ci.yml`, `.github/workflows/release.yml`, GitHub Actions run artifacts |
 | JSON prediction API and isolated container proof | `src/heart_disease/api/`, `Dockerfile`, `tests/fixtures/valid_request.json`, `make docker-smoke` |
-| Kubernetes deployment, Ingress, endpoint proof | `deploy/k8s/`, `scripts/deploy_minikube.sh`, `scripts/run_lab_deployment.sh`, `reports/evidence/` |
-| Request logging and monitoring/dashboard | `src/heart_disease/api/`, `deploy/monitoring/`, `scripts/monitoring_dashboard.py`, `reports/evidence/screenshots/monitoring/` |
+| Kubernetes deployment, Ingress, endpoint proof | `deploy/k8s/`, `scripts/deploy_minikube.sh`, `scripts/run_lab_deployment.sh`, `reports/evidence/bits/` |
+| Request logging and monitoring/dashboard | `src/heart_disease/api/`, `deploy/monitoring/`, `scripts/monitoring_dashboard.py`, `reports/evidence/bits/screenshots/monitoring.png` |
 | Setup, modeling, architecture, deployment and report | This README, `docs/architecture.md`, other `docs/`, `make report` after BITS evidence capture; see `docs/deployment-bits.md` |
-| Local API access instructions and short pipeline video | [Minikube access instructions](docs/deployment-minikube.md), [recording outline](docs/video-script.md), [video link placeholder](docs/video-link.md) |
+| Local API access instructions and short pipeline video | [BITS access instructions](reports/evidence/bits/reviewer-access.md), [recording details](docs/video-link.md) |
 
-The assignment permits **local Kubernetes** and local access instructions when the API is not public; paid cloud deployment and a public URL are not required for this chosen path. The overall architecture is in [docs/architecture.md](docs/architecture.md), progress and measured evidence in [docs/progress.md](docs/progress.md), and the remaining student/submission checks in [docs/submission-checklist.md](docs/submission-checklist.md).
+The assignment permits **local Kubernetes** and local access instructions when the API is not public; paid cloud deployment and a public URL are not required for this chosen path. See the [architecture](docs/architecture.md) and [validated BITS evidence](reports/evidence/bits/README.md).
 
-The earlier workstation report is historical and is retained under `output/pdf/historical/`. `make report-draft` creates a clearly marked ten-page layout draft. After the BITS deployment, capture the four current-release screenshots, add tested reviewer access instructions, record the pipeline, then run `make report VIDEO_URL='https://your-recording-link'`. The generator checks the selected release evidence and refuses incomplete final inputs. Follow [the submission workflow](docs/deployment-bits.md) and [checklist](docs/submission-checklist.md); the student must review the final PDF and explain the implementation independently.
+The final report uses the BITS evidence in `reports/evidence/bits` and the completed video. The generator checks release consistency, required screenshots and access instructions before producing exactly ten pages. Follow the [submission workflow](docs/deployment-bits.md). Submit the final PDF and existing MP4, commit/push the report and evidence, and verify the evaluator can access the deliverables and documented local testing path.
 
 ## GitHub Actions
 
@@ -256,3 +262,5 @@ Stop any port-forward, dashboard, or tunnel terminals separately. `minikube dele
 ## Data attribution
 
 Janosi, A., Steinbrunn, W., Pfisterer, M., & Detrano, R. (1989). *Heart Disease*. UCI Machine Learning Repository. <https://doi.org/10.24432/C52P4X>. Licensed under CC BY 4.0. See [data provenance](data/README.md).
+
+Implementation and documentation were developed with Codex assistance. The student must review and understand the implementation and follow the course's academic integrity and assistance-disclosure rules.

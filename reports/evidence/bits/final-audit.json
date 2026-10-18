@@ -1,0 +1,46 @@
+{
+  "checked_at": "2026-10-18",
+  "scope": "Final requirement-by-requirement submission audit after historical-output cleanup",
+  "current_tests": {
+    "unit": 34,
+    "integration": 2
+  },
+  "isolated_pipeline": {
+    "status": "passed",
+    "command": "make verify",
+    "environment": "Existing Python 3.11 locked project environment; fresh temporary project tree with pinned cached source, no initial model or training outputs. Fresh training succeeded; an initial fixture-copy omission of deploy/ was corrected and the complete verification then passed.",
+    "test_metrics_match_bits": true,
+    "cv_metrics_match_bits": true,
+    "candidate_cv_plots": 25,
+    "mlflow_runs": 27
+  },
+  "checks": {
+    "lint": "passed",
+    "format": "passed",
+    "pip_check": "no broken requirements",
+    "shell_syntax": "passed",
+    "kustomize": "5 resources rendered",
+    "traefik_manifest": "8 YAML resources parsed",
+    "prometheus_manifest": "6 YAML resources parsed",
+    "captured_bits_release": "validated",
+    "pdf_pages": 10,
+    "pdf_hash": "8e090683299d3fc3b356fcc6864cd6bab4e503ae566f5c68675cb982257f7ad6",
+    "screenshot_and_video_hashes": "matched submission-manifest.json",
+    "documentation_links": "resolved"
+  },
+  "github": {
+    "repository_visibility": "PUBLIC",
+    "release_run": "39107510102",
+    "release_conclusion": "success",
+    "release_commit": "ae005d121706927a0d7956126c87bf5c85ada6c0"
+  },
+  "remaining_delivery_steps": [
+    "Commit and push the final working-tree changes, report and selected BITS evidence to the submission repository",
+    "Submit final PDF and existing MP4; confirm access through the course submission channel"
+  ],
+  "limits": [
+    "VM was not redeployed during this audit; Docker and Kubernetes execution proof is the validated captured release",
+    "Fresh training used the installed environment and pinned cached raw source; it was not a new network installation",
+    "The previously agreed original Cleveland 13-predictor schema is retained"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "access_mode": "Private BITS VM; SSH tunnel to Traefik Ingress",
+  "archive_sha256": "65d2f2700da076df032795cffc347cdef2b7ab87f97eaa38f048768e2df07f45",
+  "attempt": "1",
+  "captured_at": "2026-10-18T08:17:37.756316+00:00",
+  "commit": "ae005d121706927a0d7956126c87bf5c85ada6c0",
+  "image": "heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0-39107510102-1",
+  "image_id": "sha256:89c2819a7a544406b527fcb187d166821a63c06c9992d2fdac30738c3804422f",
+  "release_root": "/home/s2025ae05568/workspace/mlops-assignment1/artifacts/lab-release-39107510102-20261018-134233",
+  "repository": "2025ae05568-rkmishra/mlops-assignment1",
+  "run_id": "39107510102"
+}

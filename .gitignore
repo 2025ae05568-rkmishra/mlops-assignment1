@@ -21,3 +21,26 @@ dist/
 
 # Report rendering and separately extracted CI artifacts
 tmp/pdfs/
+# Temporary narration recovery files; the final MP4 is submitted separately.
+output/audio/
+
+# Local planning notes and superseded documentation retained outside submission.
+/docs/data-card.md
+/docs/decisions.md
+/docs/deployment-minikube.md
+/docs/environment.md
+/docs/operations.md
+/docs/originality.md
+/docs/progress.md
+/docs/requirements-matrix.md
+/docs/submission-checklist.md
+/docs/video-script.md
+/output/pdf/2025ae05568-mlops-draft-report.pdf
+/output/pdf/historical/
+
+# Regenerable run outputs; retain only the selected BITS submission snapshot.
+/reports/figures/
+/reports/metrics/
+/reports/evidence/*
+!/reports/evidence/bits/
+/docs/model-manifest.json

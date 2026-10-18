@@ -4,6 +4,7 @@ PY := .venv/bin/python
 IMAGE ?= heart-disease-api:$(shell $(PY) scripts/image_tag.py)
 EVIDENCE_DIR ?=
 VIDEO_URL ?=
+VIDEO_FILE ?=
 API_URL ?= http://127.0.0.1:8000
 export MPLCONFIGDIR := /tmp/mlops-matplotlib
 export OMP_NUM_THREADS := 1
@@ -53,7 +54,7 @@ dashboard:
 evidence:
 	$(PY) scripts/collect_evidence.py
 report:
-	$(PY) scripts/build_final_report.py $(if $(EVIDENCE_DIR),--evidence-dir "$(EVIDENCE_DIR)") $(if $(VIDEO_URL),--video-url "$(VIDEO_URL)")
+	$(PY) scripts/build_final_report.py $(if $(EVIDENCE_DIR),--evidence-dir "$(EVIDENCE_DIR)") $(if $(VIDEO_URL),--video-url "$(VIDEO_URL)") $(if $(VIDEO_FILE),--video-file "$(VIDEO_FILE)")
 
 .PHONY: report-draft vm-access
 report-draft:

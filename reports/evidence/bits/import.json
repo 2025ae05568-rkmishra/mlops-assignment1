@@ -1,0 +1,22 @@
+{
+  "archive_name": "bits-evidence.tgz",
+  "archive_sha256": "1802ac7cabaef44a9bd0213b47f25fb637cca880d437b402bb0c0c1fef1841f7",
+  "snapshot": "submission-39107510102-1-20261018-134722",
+  "copied_without_modifying_capture": [
+    "api.json",
+    "release.json",
+    "manifest.json",
+    "deployment.txt",
+    "pods.txt",
+    "nodes.txt",
+    "resources.txt",
+    "monitoring.json",
+    "api-logs.txt",
+    "ci/",
+    "metrics/",
+    "figures/",
+    "data/"
+  ],
+  "excluded": "mlflow-view.db is a disposable UI database; figures/monitoring-final.png was a byte-identical historical Mac screenshot carried into the release and is not BITS monitoring evidence. Both are excluded from the curated snapshot; the source archive is unchanged.",
+  "access_correction": "release.json retains the capture script default SSH label. Demonstrated access was the BITS remote desktop; reviewer-access.md and the report document that method. SSH was not tested."
+}

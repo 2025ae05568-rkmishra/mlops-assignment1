@@ -41,8 +41,8 @@ class Architecture(Flowable):
             (336, 140, "GitHub Actions", "Tests + Docker proof"),
             (336, 70, "Release artifact", "Verified AMD64 image"),
             (168, 70, "BITS VM / Minikube", "Traefik -> API pods"),
-            (0, 70, "Reviewer client", "SSH + Ingress requests"),
-            (168, 0, "Prometheus", "Per-pod metrics + logs"),
+            (0, 70, "BITS desktop", "Browser + Ingress checks"),
+            (168, 0, "Prometheus", "Per-pod metrics"),
             (336, 0, "Private dashboard", "Rate, errors, p95, ready"),
         ]
         for x, y, title, sub in boxes:
@@ -68,7 +68,13 @@ class Architecture(Flowable):
 
 def build(args):
     draft = args.draft
+    video_file = Path(args.video_file).resolve() if args.video_file else None
+    if video_file and (not video_file.is_file() or video_file.stat().st_size == 0):
+        raise ValueError("Supply a nonempty exported recording for --video-file")
     evidence = Path(args.evidence_dir).resolve() if args.evidence_dir else None
+    selected = ROOT / "reports/evidence/bits"
+    if evidence is None and (selected / "release.json").is_file():
+        evidence = selected
     pointer = ROOT / "reports/evidence/runtime/latest-submission.txt"
     if evidence is None and pointer.exists() and not draft:
         evidence = Path(pointer.read_text().strip())
@@ -115,8 +121,10 @@ def build(args):
         for name in ("ci", "mlflow", "deployment", "monitoring"):
             with PILImage.open(screenshots / f"{name}.png") as im:
                 im.verify()
-        if not args.video_url or not args.video_url.startswith("https://"):
-            raise ValueError("Supply --video-url with the reviewer-accessible HTTPS recording link")
+        if args.video_url and not args.video_url.startswith("https://"):
+            raise ValueError("The recording link must use HTTPS")
+        if not args.video_url and not video_file:
+            raise ValueError("Supply --video-file for a separate video submission or --video-url")
         if not access_file.is_file() or any(
             token in access for token in ("USER@VM", "REPLACE", "pending", "Pending")
         ):
@@ -232,7 +240,7 @@ def build(args):
         "SmallX",
     )
     p(
-        "The actual dataset has 13 predictors plus the diagnosis target; the student explicitly selected this schema despite the PDF's feature-count wording. Scores are educational model estimates, not clinically validated risk."
+        "The original Cleveland dataset contains 13 predictors plus the diagnosis target. Diagnosis codes 1-4 become the positive class and code 0 the negative class. The model is educational; its scores are not clinically validated risk."
     )
     if draft and not evidence:
         p(
@@ -241,18 +249,20 @@ def build(args):
 
     page(2, "Architecture and environment")
     story.append(Architecture())
+    story.append(Spacer(1, 10))
+    p("Figure 1. Training, release, private Kubernetes access and monitoring flow.", "SmallX")
     p(
         "The build runs in GitHub Actions on AMD64. The BITS VM downloads the successful release artifact, checks the archive checksum, loads the image into Minikube and verifies predictions through Traefik Ingress. Training and image rebuilding are not needed on the VM."
     )
     p(
-        "The reviewer access path is workstation SSH forwarding to the VM's localhost Traefik port. Host heart-disease.test selects the Ingress rule. Prometheus and the dashboard stay private. No public API URL or managed-cloud deployment is claimed."
+        "The demonstrated access path is the authorized BITS remote desktop. A persistent VM terminal forwards localhost port 8081 to Traefik; Host heart-disease.test selects the Ingress rule. The browser opens the private dashboard and MLflow on the VM. This is the permitted local-Kubernetes deployment option."
     )
     table(
         [
             ["Boundary", "Implementation"],
             ["Training", "Python 3.11; locked requirements; scikit-learn and MLflow"],
             ["Serving", "FastAPI/Uvicorn; one worker per pod; verified baked-in model"],
-            ["Deployment", "Rocky Linux 9 x86_64; Docker driver; Minikube and Traefik"],
+            ["Deployment", "Rocky Linux 9 x86_64; Minikube 1.35; Kubernetes 1.32.0"],
             ["Capacity", "Two API replicas on one node; no node-level fault tolerance"],
             ["Monitoring", "Per-pod Prometheus scraping; private four-panel dashboard"],
         ]
@@ -272,13 +282,21 @@ def build(args):
         "Training-only correlation heatmap; associations are descriptive, not causal.",
         150,
     )
+    p(
+        "The training classes are only moderately imbalanced. Oldpeak is right-skewed, and maximum heart rate decreases with age in this cohort. Missing ca/thal values are retained for fold-fitted imputation; no held-out data are used to choose transformations.",
+        "SmallX",
+    )
 
     page(4, "Feature engineering, model comparison and tracking")
     p(
         "A fixed stratified 80/20 split and five shared training-only folds use seed 42. Numeric features use median imputation and scaling for Logistic Regression. Categorical features use mode imputation and one-hot encoding. Random Forest omits scaling. The entire fitted pipeline is shared with inference."
     )
     p(
-        f"The search evaluates {len(candidates)} configurations: DummyClassifier, Logistic Regression and Random Forest. Selection uses mean CV ROC-AUC, preferring Logistic Regression when within 0.01 of the best. Threshold 0.5 is fixed; held-out performance does not select the model."
+        "Continuous inputs are age, trestbps, chol, thalach and oldpeak. The eight remaining source-code fields are categorical; their numeric codes are not treated as continuous magnitudes.",
+        "SmallX",
+    )
+    p(
+        f"The search evaluates {len(candidates)} configurations: one prior-class baseline, six Logistic Regression settings (C=0.1, 1, 10; class weight none/balanced), and 18 Random Forest settings (200 trees; depth unrestricted/4/8; minimum leaf 1/3/5; weight none/balanced). Selection uses mean CV ROC-AUC, preferring Logistic Regression within 0.01 of the best. Threshold 0.5 is fixed; held-out results do not drive tuning."
     )
     best = [
         next(r for r in candidates if r["family"] == "dummy"),
@@ -301,10 +319,15 @@ def build(args):
         ]
     )
     screenshot(
-        "mlflow", "Selected release's MLflow run: parameters, metrics, lineage and artifacts.", 260
+        "mlflow",
+        "Figure 2. Selected MLflow run: held-out metrics, parameters and parent-run lineage.",
+        240,
     )
     p(
-        "Each candidate has a child run with fold metrics, aggregates, parameters and plots. The selected refit exports a full serving bundle. Training-only folds prevent preprocessing leakage."
+        "Each candidate child run logs fold metrics, aggregate mean/std, parameters, schema, lineage and a CV plot. The final refit logs held-out curves and the complete serving bundle. The MLflow run ID is "
+        + esc(manifest["run_id"])
+        + ". Artifact screenshots and original plots are retained with the evidence.",
+        "SmallX",
     )
 
     page(5, "Held-out results and limitations")
@@ -314,7 +337,7 @@ def build(args):
     table([["Held-out metric", "Value"]] + [[k, f"{v:.6f}"] for k, v in test.items()])
     image(
         figures / "confusion_matrix.png",
-        "Held-out confusion matrix at the configured threshold.",
+        "Held-out confusion matrix: 28 true negatives, 26 true positives, five false positives and two false negatives.",
         170,
     )
     image(
@@ -365,6 +388,15 @@ def build(args):
         p(
             f"Captured Ingress result: prediction {result['prediction']}, positive-class probability {result['positive_class_probability']:.6f}, confidence {result['confidence']:.6f}; invalid status {api['invalid_status']}; external metrics status {api['metrics_status']}."
         )
+        p(
+            "<b>Synthetic JSON input:</b> "
+            + esc((ROOT / "tests/fixtures/valid_request.json").read_text().strip()),
+            "SmallX",
+        )
+        p(
+            "Confidence is p for a positive prediction and 1-p for a negative prediction; the returned label uses threshold 0.5. The API includes a request ID so a response can be traced to structured logs.",
+            "SmallX",
+        )
     else:
         p("BITS API and container-to-deployment identity evidence pending.")
 
@@ -383,11 +415,16 @@ def build(args):
     )
     screenshot(
         "ci",
-        "Successful selected release workflow with training, tests, Docker proof and artifact export.",
-        330,
+        "Figure 3. Successful release job: isolated Docker smoke test and matching model/image IDs (recording at 02:00).",
+        245,
+    )
+    screenshot(
+        "ci-artifact",
+        "Figure 4. The same successful workflow exposes its downloadable release artifact (recording at 11:00).",
+        95,
     )
     p(
-        "The VM verifies the downloaded image archive checksum before loading. Release commit, run/attempt, model version, archive hash, image identity and actual pod resources are retained together. The deployment verifies that responses identify the selected release."
+        "The VM verifies the downloaded image archive checksum before loading. Release commit, run/attempt, model version, archive hash, image identity and actual pod resources are retained together. Responses identify the selected release. The model manifest preserves dirty=true and source/config/data hashes rather than asserting a clean tree after generated outputs."
     )
     if "archive_sha256" in release:
         p("<b>Archive SHA-256:</b> " + esc(release["archive_sha256"]), "SmallX")
@@ -396,15 +433,20 @@ def build(args):
     p(
         "The application uses a Deployment with two replicas, startup/readiness/liveness probes, resource requests/limits and a ClusterIP Service. Traefik interprets Exact-path Ingress rules for prediction, health, readiness, version and API docs; /metrics is excluded."
     )
+    p(
+        "The VM's Minikube 1.35 has no Traefik addon. Applying deploy/traefik/controller.yaml installed the pinned controller without upgrading host tools. The successful release was then redeployed with --reuse-run 39107510102. The final script retains this manifest-based installation path.",
+        "SmallX",
+    )
     screenshot(
         "deployment",
-        "BITS VM resources and successful valid/invalid requests through Traefik Ingress.",
-        300,
+        "Figure 5. Successful BITS deployment, selected release identity and valid/invalid Ingress responses.",
+        235,
     )
-    p("Reviewer access instructions (tested by the student):")
+    p("Local testing access (demonstrated on the BITS desktop):")
     p(esc(access).replace("\n", "<br/>"), "SmallX")
     p(
-        "The forwarding process must remain running during review. The port-forward to Traefik exercises Ingress rules; it does not claim a publicly reachable LoadBalancer. A direct API Service port-forward is not used as Ingress proof."
+        "Keep the access terminal running during testing. The forward targets the Traefik controller Service and exercises the host/path Ingress rules.",
+        "SmallX",
     )
 
     page(9, "Monitoring and request logging")
@@ -413,7 +455,7 @@ def build(args):
     )
     screenshot(
         "monitoring",
-        "Actual BITS dashboard after synthetic traffic, with both current pod targets UP.",
+        "Figure 6. BITS dashboard after additional manual traffic; both current pod targets are UP.",
         330,
     )
     if api:
@@ -422,6 +464,10 @@ def build(args):
             + esc(json.dumps(api["traffic_counts"]))
             + f" over {api['traffic_seconds']} seconds. Expected invalid requests deliberately contribute to the 4xx series."
         )
+        p(
+            "The dashboard screenshot was taken later than this automated capture, after a further 60-second test (111 successful and 111 rejected requests). Its higher rate is expected; HTTP 422 is deliberate validation traffic, not a server failure.",
+            "SmallX",
+        )
     p(
         "Structured logs retain request ID, route, status, duration and model version without raw health values. Captured logs are included in api-logs.txt. Metric labels are bounded. Inference p95 measures model computation rather than network latency."
     )
@@ -429,36 +475,46 @@ def build(args):
         "Prometheus retains up to 24 hours / 256 MB using ephemeral storage. Export the evidence directory before stopping or replacing the VM. Two API replicas on the same node do not protect against VM failure."
     )
 
-    page(10, "Reproduction, deliverables and individual review")
+    page(10, "Setup, reproduction and submission deliverables")
     p(
-        "On BITS: clone the repository, use Python 3.11 and locked requirements, run bash scripts/bootstrap_rocky9.sh --skip-installed, authenticate GitHub CLI, then run bash scripts/run_lab_deployment.sh. On a replacement VM, use --reuse-run RUN_ID at the same commit. Docker and Minikube must already be available to the regular user."
+        "<b>Clean development setup:</b> clone the repository linked on page 1 and enter its directory. With Python 3.11 available, run <b>make setup</b> (locked requirements and editable package), then <b>make verify</b> (lint, data, EDA, training, packaging and tests). Run <b>make docker-build docker-smoke</b> to repeat isolated serving checks. Detailed commands: README.md."
     )
     p(
-        "Run bash scripts/open_vm_access.sh in a persistent VM terminal. Open the dashboard on the VM desktop, generate synthetic requests, and capture the selected release's CI, MLflow, deployment and monitoring screenshots. Record the overall pipeline and verify reviewer permissions. Build the final report with make report VIDEO_URL=https://... after adding screenshots and tested reviewer-access.md to the captured evidence directory."
+        "<b>BITS deployment:</b> Docker and Minikube must be available to the regular user. Run <b>bash scripts/bootstrap_rocky9.sh --skip-installed</b>, authenticate with <b>gh auth login</b>, then run <b>bash scripts/run_lab_deployment.sh</b> from a clean checkout matching pushed main. The runner builds on GitHub and deploys the verified artifact. <b>--reuse-run</b> accepts a successful release of that same current main commit; after submitting later commits, use the default command for a new deployment. This report retains evidence for the recorded release on page 1."
+    )
+    p(
+        "<b>Report reproduction:</b> keep the captured evidence at reports/evidence/bits. Run <b>make report EVIDENCE_DIR=reports/evidence/bits VIDEO_FILE=/path/to/2025ae05568-mlops.mp4</b>. This reads archived evidence; it does not retrain or redeploy.",
+        "SmallX",
     )
     table(
         [
             ["Deliverable", "Repository location"],
             [
                 "Data / EDA / training / inference",
-                "data/processed/cleaned.csv; src/; notebooks/; reports/figures",
+                "data/processed/cleaned.csv; src/; notebooks/; reports/evidence/bits/figures",
             ],
             ["Environment / tests / CI", "requirements*.txt; tests/; .github/workflows/"],
             ["Container / deployment / monitoring", "Dockerfile; deploy/; scripts/"],
             [
                 "Evidence / report / access",
-                "Selected evidence directory; output/pdf; docs/deployment-bits.md",
+                "reports/evidence/bits; output/pdf; docs/deployment-bits.md",
             ],
         ]
     )
     p(
         '<b>Video:</b> <link href="' + esc(args.video_url) + '">' + esc(args.video_url) + "</link>"
         if args.video_url
-        else "Video: pending student recording",
+        else (
+            "<b>Video:</b> "
+            + esc(video_file.name)
+            + " (submitted separately; 11 minutes 13 seconds)."
+            if video_file
+            else "Video: pending student recording"
+        ),
         "SmallX",
     )
     p(
-        "<b>Sources:</b> UCI Heart Disease, https://doi.org/10.24432/C52P4X (CC BY 4.0); repository and selected workflow linked above. This work was developed with Codex assistance. The student must review, understand, personalize and disclose assistance according to course rules. The report does not certify independent understanding or guarantee marks.",
+        "<b>Sources and assistance:</b> Janosi et al., UCI Heart Disease, https://doi.org/10.24432/C52P4X (CC BY 4.0); repository and selected workflow linked above. Implementation and documentation were developed with Codex assistance. Individual understanding and compliance with course rules remain the student's responsibility.",
         "SmallX",
     )
 
@@ -504,6 +560,9 @@ def build(args):
                 "pages": doc.page,
                 "release": release,
                 "video_url": args.video_url,
+                "video_file": (
+                    {"name": video_file.name, "sha256": sha256(video_file)} if video_file else None
+                ),
                 "screenshots": {p.name: sha256(p) for p in screenshots.glob("*.png")},
                 "access_sha256": sha256(access_file),
             },
@@ -515,6 +574,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--evidence-dir")
     parser.add_argument("--video-url")
+    parser.add_argument(
+        "--video-file", help="Exported recording submitted separately with the report"
+    )
     parser.add_argument("--draft", action="store_true")
     parser.add_argument("--output")
     try:

@@ -1,0 +1,363 @@
+Lab deployment started: 2026-10-18T13:42:03+05:30
+Repository: 2025ae05568-rkmishra/mlops-assignment1
+Commit: ae005d121706927a0d7956126c87bf5c85ada6c0
+Log: /home/s2025ae05568/workspace/mlops-assignment1/reports/evidence/runtime/lab-deployment-20261018-134203.log
+
+==> Verify GitHub CLI authentication
+Command: gh auth status --hostname github.com
+github.com
+  ✓ Logged in to github.com account 2025ae05568-rkmishra (/home/s2025ae05568/.config/gh/hosts.yml)
+  - Active account: true
+  - Git operations protocol: https
+  - Token: gho_************************************
+  - Token scopes: 'gist', 'read:org', 'repo', 'workflow'
+<== Verify GitHub CLI authentication: OK (exit 0, 1s)
+Verified clean main checkout matches GitHub commit ae005d121706927a0d7956126c87bf5c85ada6c0.
+
+==> Check Docker daemon
+Command: docker info --format architecture=\{\{.Architecture\}\}\ CPUs=\{\{.NCPU\}\}\ memory=\{\{.MemTotal\}\}\ bytes
+architecture=x86_64 CPUs=4 memory=16351625216 bytes
+<== Check Docker daemon: OK (exit 0, 0s)
+
+==> Start or check Minikube profile
+Command: minikube -p mlops-assignment start --driver=docker --cpus=4 --memory=6144
+* [mlops-assignment] minikube v1.35.0 on Rocky 9.5
+* Using the docker driver based on existing profile
+* Starting "mlops-assignment" primary control-plane node in "mlops-assignment" cluster
+* Pulling base image v0.0.46 ...
+* Updating the running docker "mlops-assignment" container ...
+* Preparing Kubernetes v1.32.0 on Docker 27.4.1 ...
+* Verifying Kubernetes components...
+  - Using image gcr.io/k8s-minikube/storage-provisioner:v5
+* Enabled addons: storage-provisioner, default-storageclass
+* Done! kubectl is now configured to use "mlops-assignment" cluster and "default" namespace by default
+<== Start or check Minikube profile: OK (exit 0, 27s)
+
+==> Check Minikube profile status
+Command: minikube -p mlops-assignment status
+mlops-assignment
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+<== Check Minikube profile status: OK (exit 0, 0s)
+
+==> Check Kubernetes nodes
+Command: kubectl --context mlops-assignment get nodes -o wide
+NAME               STATUS   ROLES           AGE    VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION                 CONTAINER-RUNTIME
+mlops-assignment   Ready    control-plane   102m   v1.32.0   192.168.49.2   <none>        Ubuntu 22.04.5 LTS   5.14.0-503.14.1.el9_5.x86_64   docker://27.4.1
+<== Check Kubernetes nodes: OK (exit 0, 1s)
+
+Reusing successful release workflow run 39107510102.
+
+==> Download GitHub release artifact release-ae005d121706927a0d7956126c87bf5c85ada6c0-1
+Command: gh run download 39107510102 --repo 2025ae05568-rkmishra/mlops-assignment1 --name release-ae005d121706927a0d7956126c87bf5c85ada6c0-1 --dir /home/s2025ae05568/workspace/mlops-assignment1/artifacts/lab-release-39107510102-20261018-134233
+<== Download GitHub release artifact release-ae005d121706927a0d7956126c87bf5c85ada6c0-1: OK (exit 0, 50s)
+
+==> Verify release archive checksum
+Command: bash -c cd\ \"\$1\"\ \&\&\ sha256sum\ -c\ artifacts/heart-disease-api.tar.gz.sha256 _ /home/s2025ae05568/workspace/mlops-assignment1/artifacts/lab-release-39107510102-20261018-134233
+artifacts/heart-disease-api.tar.gz: OK
+<== Verify release archive checksum: OK (exit 0, 0s)
+
+==> Load release image into Docker
+Command: docker load -i /home/s2025ae05568/workspace/mlops-assignment1/artifacts/lab-release-39107510102-20261018-134233/artifacts/heart-disease-api.tar.gz
+Loaded image: heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0
+<== Load release image into Docker: OK (exit 0, 7s)
+
+==> Give the verified release a unique deployment tag
+Command: docker tag heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0 heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0-39107510102-1
+<== Give the verified release a unique deployment tag: OK (exit 0, 0s)
+
+==> Verify loaded image
+Command: docker image inspect heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0-39107510102-1 --format \{\{.Id\}\}\ \{\{.Os\}\}/\{\{.Architecture\}\}
+sha256:89c2819a7a544406b527fcb187d166821a63c06c9992d2fdac30738c3804422f linux/amd64
+<== Verify loaded image: OK (exit 0, 0s)
+
+==> Install project dependencies
+Command: make setup
+python3.11 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
+Requirement already satisfied: aiohappyeyeballs==2.7.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 7)) (2.7.1)
+Requirement already satisfied: aiohttp==3.14.5 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 11)) (3.14.5)
+Requirement already satisfied: aiosignal==1.4.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 15)) (1.4.0)
+Requirement already satisfied: alembic==1.20.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 19)) (1.20.0)
+Requirement already satisfied: annotated-doc==0.0.5 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 23)) (0.0.5)
+Requirement already satisfied: annotated-types==0.8.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 27)) (0.8.0)
+Requirement already satisfied: anyio==4.15.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 31)) (4.15.1)
+Requirement already satisfied: appnope==1.0.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 37)) (1.0.0)
+Requirement already satisfied: asttokens==3.0.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 39)) (3.0.2)
+Requirement already satisfied: attrs==26.1.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 41)) (26.1.0)
+Requirement already satisfied: beautifulsoup4==4.15.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 47)) (4.15.0)
+Requirement already satisfied: bleach==6.4.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 49)) (6.4.0)
+Requirement already satisfied: blinker==1.9.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 51)) (1.9.0)
+Requirement already satisfied: build==1.6.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 55)) (1.6.1)
+Requirement already satisfied: cachetools==7.2.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 57)) (7.2.1)
+Requirement already satisfied: certifi==2026.7.22 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 62)) (2026.7.22)
+Requirement already satisfied: cffi==2.1.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 68)) (2.1.1)
+Requirement already satisfied: charset-normalizer==3.5.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 72)) (3.5.2)
+Requirement already satisfied: click==8.5.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 77)) (8.5.0)
+Requirement already satisfied: cloudpickle==3.1.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 84)) (3.1.2)
+Requirement already satisfied: comm==0.2.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 89)) (0.2.3)
+Requirement already satisfied: contourpy==1.3.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 91)) (1.3.3)
+Requirement already satisfied: coverage==7.16.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 95)) (7.16.2)
+Requirement already satisfied: cryptography==50.0.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 97)) (50.0.2)
+Requirement already satisfied: cycler==0.12.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 102)) (0.12.1)
+Requirement already satisfied: databricks-sdk==0.151.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 106)) (0.151.0)
+Requirement already satisfied: debugpy==1.8.22 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 111)) (1.8.22)
+Requirement already satisfied: defusedxml==0.7.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 113)) (0.7.1)
+Requirement already satisfied: docker==7.2.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 115)) (7.2.0)
+Requirement already satisfied: executing==2.3.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 119)) (2.3.0)
+Requirement already satisfied: fastapi==0.143.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 121)) (0.143.0)
+Requirement already satisfied: fastjsonschema==2.22.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 125)) (2.22.2)
+Requirement already satisfied: flask==3.1.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 127)) (3.1.3)
+Requirement already satisfied: flask-cors==6.0.5 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 132)) (6.0.5)
+Requirement already satisfied: fonttools==4.66.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 136)) (4.66.1)
+Requirement already satisfied: frozenlist==1.8.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 140)) (1.8.0)
+Requirement already satisfied: gitdb==4.0.12 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 145)) (4.0.12)
+Requirement already satisfied: gitpython==3.2.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 149)) (3.2.0)
+Requirement already satisfied: google-auth==2.61.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 153)) (2.61.0)
+Requirement already satisfied: graphene==3.4.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 157)) (3.4.3)
+Requirement already satisfied: graphql-core==3.2.13 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 161)) (3.2.13)
+Requirement already satisfied: graphql-relay==3.2.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 166)) (3.2.0)
+Requirement already satisfied: gunicorn==26.2.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 170)) (26.2.0)
+Requirement already satisfied: h11==0.16.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 174)) (0.16.0)
+Requirement already satisfied: httpcore==1.0.9 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 179)) (1.0.9)
+Requirement already satisfied: httpx==0.28.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 183)) (0.28.1)
+Requirement already satisfied: huey==3.4.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 185)) (3.4.0)
+Requirement already satisfied: idna==3.20 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 189)) (3.20)
+Requirement already satisfied: importlib-metadata==9.0.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 196)) (9.0.1)
+Requirement already satisfied: iniconfig==2.3.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 200)) (2.3.1)
+Requirement already satisfied: ipykernel==7.4.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 202)) (7.4.0)
+Requirement already satisfied: ipython==9.17.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 204)) (9.17.1)
+Requirement already satisfied: ipython-pygments-lexers==1.1.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 206)) (1.1.1)
+Requirement already satisfied: itsdangerous==2.2.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 208)) (2.2.0)
+Requirement already satisfied: jedi==0.20.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 212)) (0.20.0)
+Requirement already satisfied: jinja2==3.1.6 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 214)) (3.1.6)
+Requirement already satisfied: joblib==1.6.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 219)) (1.6.0)
+Requirement already satisfied: jsonschema==4.26.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 223)) (4.26.0)
+Requirement already satisfied: jsonschema-specifications==2025.9.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 225)) (2025.9.1)
+Requirement already satisfied: jupyter-client==8.10.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 227)) (8.10.0)
+Requirement already satisfied: jupyter-core==5.9.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 231)) (5.9.1)
+Requirement already satisfied: jupyterlab-pygments==0.3.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 238)) (0.3.0)
+Requirement already satisfied: kiwisolver==1.5.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 240)) (1.5.1)
+Requirement already satisfied: mako==1.4.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 244)) (1.4.3)
+Requirement already satisfied: markupsafe==3.0.4 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 248)) (3.0.4)
+Requirement already satisfied: matplotlib==3.11.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 256)) (3.11.2)
+Requirement already satisfied: matplotlib-inline==0.2.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 261)) (0.2.2)
+Requirement already satisfied: mistune==3.3.4 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 265)) (3.3.4)
+Requirement already satisfied: mlflow==3.17.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 267)) (3.17.0)
+Requirement already satisfied: mlflow-skinny==3.17.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 269)) (3.17.0)
+Requirement already satisfied: mlflow-tracing==3.17.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 273)) (3.17.0)
+Requirement already satisfied: multidict==7.1.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 277)) (7.1.0)
+Requirement already satisfied: narwhals==2.27.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 282)) (2.27.1)
+Requirement already satisfied: nbclient==0.11.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 286)) (0.11.0)
+Requirement already satisfied: nbconvert==7.17.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 288)) (7.17.1)
+Requirement already satisfied: nbformat==5.11.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 290)) (5.11.1)
+Requirement already satisfied: nest-asyncio2==1.7.4 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 295)) (1.7.4)
+Requirement already satisfied: numpy==2.4.6 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 297)) (2.4.6)
+Requirement already satisfied: opentelemetry-api==1.45.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 308)) (1.45.1)
+Requirement already satisfied: opentelemetry-proto==1.45.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 316)) (1.45.1)
+Requirement already satisfied: opentelemetry-sdk==1.45.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 321)) (1.45.1)
+Requirement already satisfied: opentelemetry-semantic-conventions==0.66b1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 326)) (0.66b1)
+Requirement already satisfied: packaging==26.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 330)) (26.3)
+Requirement already satisfied: pandas==2.3.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 342)) (2.3.3)
+Requirement already satisfied: pandocfilters==1.5.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 347)) (1.5.1)
+Requirement already satisfied: parso==0.8.7 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 349)) (0.8.7)
+Requirement already satisfied: pexpect==4.9.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 351)) (4.9.0)
+Requirement already satisfied: pillow==12.3.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 353)) (12.3.0)
+Requirement already satisfied: pip-tools==7.6.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 359)) (7.6.2)
+Requirement already satisfied: platformdirs==4.13.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 361)) (4.13.0)
+Requirement already satisfied: pluggy==1.6.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 363)) (1.6.0)
+Requirement already satisfied: prettytable==3.18.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 367)) (3.18.0)
+Requirement already satisfied: prometheus-client==0.26.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 371)) (0.26.0)
+Requirement already satisfied: prompt-toolkit==3.0.53 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 373)) (3.0.53)
+Requirement already satisfied: propcache==0.5.4 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 375)) (0.5.4)
+Requirement already satisfied: protobuf==6.33.6 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 380)) (6.33.6)
+Requirement already satisfied: psutil==7.2.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 387)) (7.2.2)
+Requirement already satisfied: ptyprocess==0.7.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 389)) (0.7.0)
+Requirement already satisfied: pure-eval==0.2.4 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 391)) (0.2.4)
+Requirement already satisfied: pyarrow==25.0.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 393)) (25.0.1)
+Requirement already satisfied: pyasn1==0.6.4 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 397)) (0.6.4)
+Requirement already satisfied: pyasn1-modules==0.4.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 401)) (0.4.2)
+Requirement already satisfied: pycparser==3.11 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 405)) (3.11)
+Requirement already satisfied: pydantic==2.14.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 409)) (2.14.0)
+Requirement already satisfied: pydantic-core==2.50.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 415)) (2.50.0)
+Requirement already satisfied: pygments==2.21.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 419)) (2.21.0)
+Requirement already satisfied: pyparsing==3.3.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 425)) (3.3.3)
+Requirement already satisfied: pyproject-hooks==1.3.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 429)) (1.3.3)
+Requirement already satisfied: pytest==9.1.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 433)) (9.1.1)
+Requirement already satisfied: pytest-cov==7.1.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 437)) (7.1.0)
+Requirement already satisfied: python-dateutil==2.9.0.post0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 439)) (2.9.0.post0)
+Requirement already satisfied: python-dotenv==1.2.4 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 446)) (1.2.4)
+Requirement already satisfied: pytz==2026.5 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 450)) (2026.5)
+Requirement already satisfied: pyyaml==6.0.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 454)) (6.0.3)
+Requirement already satisfied: pyzmq==27.2.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 458)) (27.2.0)
+Requirement already satisfied: referencing==0.37.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 462)) (0.37.0)
+Requirement already satisfied: reportlab==4.5.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 466)) (4.5.1)
+Requirement already satisfied: requests==2.34.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 468)) (2.34.2)
+Requirement already satisfied: rpds-py==2026.9.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 474)) (2026.9.1)
+Requirement already satisfied: ruff==0.17.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 478)) (0.17.0)
+Requirement already satisfied: scikit-learn==1.9.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 480)) (1.9.1)
+Requirement already satisfied: scipy==1.17.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 485)) (1.17.1)
+Requirement already satisfied: seaborn==0.13.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 491)) (0.13.2)
+Requirement already satisfied: six==1.17.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 493)) (1.17.0)
+Requirement already satisfied: skops==0.16.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 497)) (0.16.0)
+Requirement already satisfied: smmap==5.0.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 501)) (5.0.3)
+Requirement already satisfied: soupsieve==3.0.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 505)) (3.0.1)
+Requirement already satisfied: sqlalchemy==2.1.4 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 507)) (2.1.4)
+Requirement already satisfied: sqlparse==0.6.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 512)) (0.6.0)
+Requirement already satisfied: stack-data==0.6.3 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 516)) (0.6.3)
+Requirement already satisfied: starlette==1.7.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 518)) (1.7.0)
+Requirement already satisfied: threadpoolctl==3.7.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 523)) (3.7.0)
+Requirement already satisfied: tinycss2==1.5.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 527)) (1.5.1)
+Requirement already satisfied: tornado==6.5.10 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 529)) (6.5.10)
+Requirement already satisfied: traitlets==5.16.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 533)) (5.16.1)
+Requirement already satisfied: typing-extensions==4.16.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 543)) (4.16.0)
+Requirement already satisfied: typing-inspection==0.4.4 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 565)) (0.4.4)
+Requirement already satisfied: tzdata==2026.5 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 570)) (2026.5)
+Requirement already satisfied: urllib3==2.8.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 574)) (2.8.0)
+Requirement already satisfied: uvicorn==0.54.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 580)) (0.54.0)
+Requirement already satisfied: wcwidth==0.9.2 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 584)) (0.9.2)
+Requirement already satisfied: webencodings==0.6.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 589)) (0.6.1)
+Requirement already satisfied: werkzeug==3.1.9 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 593)) (3.1.9)
+Requirement already satisfied: wheel==0.48.0 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 598)) (0.48.0)
+Requirement already satisfied: yarl==1.25.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 600)) (1.25.1)
+Requirement already satisfied: zipp==4.1.1 in ./.venv/lib64/python3.11/site-packages (from -r requirements-dev.txt (line 604)) (4.1.1)
+Requirement already satisfied: pip>=22.2 in ./.venv/lib64/python3.11/site-packages (from pip-tools==7.6.2->-r requirements-dev.txt (line 359)) (22.3.1)
+Requirement already satisfied: setuptools in ./.venv/lib64/python3.11/site-packages (from pip-tools==7.6.2->-r requirements-dev.txt (line 359)) (65.5.1)
+
+[notice] A new release of pip available: 22.3.1 -> 26.2.1
+[notice] To update, run: /home/s2025ae05568/workspace/mlops-assignment1/.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install --no-deps --no-build-isolation -e .
+Obtaining file:///home/s2025ae05568/workspace/mlops-assignment1
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: heart-disease-mlops
+  Building editable for heart-disease-mlops (pyproject.toml): started
+  Building editable for heart-disease-mlops (pyproject.toml): finished with status 'done'
+  Created wheel for heart-disease-mlops: filename=heart_disease_mlops-0.1.0-0.editable-py3-none-any.whl size=1541 sha256=2e9f25c59ab40a5d2cc561e183e103580399007946e951931600ae9862ec7045
+  Stored in directory: /tmp/pip-ephem-wheel-cache-ysokv6lt/wheels/73/8a/4b/cdfb2b99d8b1cc8fb4386ab26d675879a45acbe1e38ffbcc42
+Successfully built heart-disease-mlops
+Installing collected packages: heart-disease-mlops
+  Attempting uninstall: heart-disease-mlops
+    Found existing installation: heart-disease-mlops 0.1.0
+    Uninstalling heart-disease-mlops-0.1.0:
+      Successfully uninstalled heart-disease-mlops-0.1.0
+Successfully installed heart-disease-mlops-0.1.0
+
+[notice] A new release of pip available: 22.3.1 -> 26.2.1
+[notice] To update, run: /home/s2025ae05568/workspace/mlops-assignment1/.venv/bin/python -m pip install --upgrade pip
+<== Install project dependencies: OK (exit 0, 106s)
+
+==> Deploy verified image to Minikube
+Command: make deploy-minikube IMAGE=heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0-39107510102-1
+bash scripts/deploy_minikube.sh heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0-39107510102-1
+mlops-assignment
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+NAME      CONTROLLER                      PARAMETERS   AGE
+traefik   traefik.io/ingress-controller   <none>       4m23s
+service/traefik patched (no change)
+namespace/mlops-assignment unchanged
+configmap/heart-disease-config created
+service/heart-disease-api created
+deployment.apps/heart-disease-api created
+ingress.networking.k8s.io/heart-disease-api created
+Waiting for deployment "heart-disease-api" rollout to finish: 0 of 2 updated replicas are available...
+Waiting for deployment "heart-disease-api" rollout to finish: 1 of 2 updated replicas are available...
+deployment "heart-disease-api" successfully rolled out
+serviceaccount/prometheus unchanged
+role.rbac.authorization.k8s.io/prometheus-discovery unchanged
+rolebinding.rbac.authorization.k8s.io/prometheus-discovery unchanged
+configmap/prometheus-config unchanged
+deployment.apps/prometheus unchanged
+service/prometheus unchanged
+deployment "prometheus" successfully rolled out
+NAME                                     READY   STATUS    RESTARTS       AGE
+pod/heart-disease-api-7db6496f74-dr85r   1/1     Running   0              11s
+pod/heart-disease-api-7db6496f74-rnx92   1/1     Running   0              11s
+pod/prometheus-5fb88968fc-thb7r          1/1     Running   3 (5m8s ago)   56m
+
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/heart-disease-api   ClusterIP   10.101.215.3    <none>        80/TCP     11s
+service/prometheus          ClusterIP   10.104.159.67   <none>        9090/TCP   56m
+
+NAME                                          CLASS     HOSTS                ADDRESS   PORTS   AGE
+ingress.networking.k8s.io/heart-disease-api   traefik   heart-disease.test             80      11s
+Run in separate terminals: minikube -p mlops-assignment tunnel; kubectl --context mlops-assignment -n mlops-assignment port-forward svc/prometheus 9090:9090
+<== Deploy verified image to Minikube: OK (exit 0, 119s)
+
+==> Verify application rollout
+Command: kubectl --context mlops-assignment -n mlops-assignment rollout status deployment/heart-disease-api --timeout=300s
+deployment "heart-disease-api" successfully rolled out
+<== Verify application rollout: OK (exit 0, 0s)
+
+==> Verify app resources
+Command: kubectl --context mlops-assignment -n mlops-assignment get pods\,svc\,ingress -o wide
+NAME                                     READY   STATUS    RESTARTS       AGE   IP            NODE               NOMINATED NODE   READINESS GATES
+pod/heart-disease-api-7db6496f74-dr85r   1/1     Running   0              12s   10.244.0.13   mlops-assignment   <none>           <none>
+pod/heart-disease-api-7db6496f74-rnx92   1/1     Running   0              12s   10.244.0.14   mlops-assignment   <none>           <none>
+pod/prometheus-5fb88968fc-thb7r          1/1     Running   3 (5m9s ago)   56m   10.244.0.12   mlops-assignment   <none>           <none>
+
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SELECTOR
+service/heart-disease-api   ClusterIP   10.101.215.3    <none>        80/TCP     12s   app=heart-disease-api
+service/prometheus          ClusterIP   10.104.159.67   <none>        9090/TCP   56m   app=prometheus
+
+NAME                                          CLASS     HOSTS                ADDRESS   PORTS   AGE
+ingress.networking.k8s.io/heart-disease-api   traefik   heart-disease.test             80      12s
+<== Verify app resources: OK (exit 0, 1s)
+
+==> Verify Traefik service
+Command: kubectl --context mlops-assignment -n kube-system get svc traefik -o wide
+NAME      TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE     SELECTOR
+traefik   LoadBalancer   10.111.255.95   <pending>     8081:30498/TCP   6m23s   app=mlops-traefik
+<== Verify Traefik service: OK (exit 0, 0s)
+
+== Start temporary local Ingress port-forward ==
+Ingress /ready succeeded through Traefik.
+
+==> Smoke-test valid and invalid API requests through Ingress
+Command: /home/s2025ae05568/workspace/mlops-assignment1/.venv/bin/python scripts/smoke_api.py --url http://127.0.0.1:8081 --host heart-disease.test --requests 20 --expected-version 8bb3330d56912ab6edad-54110720
+{
+  "valid": {
+    "request_id": "076604f0-9d06-4cc3-97a5-712bf480b862",
+    "prediction": 0,
+    "positive_class_probability": 0.22552718385475576,
+    "confidence": 0.7744728161452442,
+    "threshold": 0.5,
+    "model_version": "8bb3330d56912ab6edad-54110720",
+    "schema_version": "1.0"
+  },
+  "invalid_status": 422
+}
+<== Smoke-test valid and invalid API requests through Ingress: OK (exit 0, 1s)
+Ingress /metrics check: correctly blocked (HTTP 404).
+
+== Capture selected-release submission evidence ==
+
+==> Capture and validate BITS evidence, model identity and monitoring
+Command: /home/s2025ae05568/workspace/mlops-assignment1/.venv/bin/python scripts/capture_submission.py --release-root /home/s2025ae05568/workspace/mlops-assignment1/artifacts/lab-release-39107510102-20261018-134233 --output /home/s2025ae05568/workspace/mlops-assignment1/reports/evidence/runtime/submission-39107510102-1-20261018-134722 --repository 2025ae05568-rkmishra/mlops-assignment1 --run-id 39107510102 --attempt 1 --image heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0-39107510102-1
+/home/s2025ae05568/workspace/mlops-assignment1/reports/evidence/runtime/submission-39107510102-1-20261018-134722
+Verified BITS evidence: /home/s2025ae05568/workspace/mlops-assignment1/reports/evidence/runtime/submission-39107510102-1-20261018-134722
+<== Capture and validate BITS evidence, model identity and monitoring: OK (exit 0, 48s)
+
+Deployment completed successfully.
+Repository commit: ae005d121706927a0d7956126c87bf5c85ada6c0
+Release workflow run: 39107510102
+Workflow: https://github.com/2025ae05568-rkmishra/mlops-assignment1/actions/runs/39107510102
+Image: heart-disease-api:ae005d121706927a0d7956126c87bf5c85ada6c0-39107510102-1
+Log: /home/s2025ae05568/workspace/mlops-assignment1/reports/evidence/runtime/lab-deployment-20261018-134203.log
+Downloaded release artifact: /home/s2025ae05568/workspace/mlops-assignment1/artifacts/lab-release-39107510102-20261018-134233
+Submission evidence: /home/s2025ae05568/workspace/mlops-assignment1/reports/evidence/runtime/submission-39107510102-1-20261018-134722
+For reviewer access and screenshots, run: bash scripts/open_vm_access.sh
+Then follow docs/deployment-bits.md to record the video and build the final report.
+To repeat on another VM, clone commit ae005d121706927a0d7956126c87bf5c85ada6c0 and run:
+  bash scripts/run_lab_deployment.sh --reuse-run 39107510102
