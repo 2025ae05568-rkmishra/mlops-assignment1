@@ -1,6 +1,8 @@
 # Local Kubernetes access
 
-Requirements: Docker Desktop running, Minikube, kubectl, a verified image for the cluster CPU architecture. Use explicit `--context mlops-assignment` to avoid mutating other clusters. Start with `minikube start -p mlops-assignment --driver=docker --cpus=4 --memory=6144`, then `make deploy-minikube`.
+Requirements: Docker running, Minikube, Python 3.11, kubectl, and a verified image for the cluster CPU architecture. On Rocky Linux 9, clone the repository and run `bash scripts/bootstrap_rocky9.sh` as your regular user before deploying. It installs Python 3.11 and supporting tools, starts/checks the dedicated Minikube profile, installs the kubectl version matching the running cluster, and writes a timestamped diagnostic log under `~/mlops-bootstrap-logs/`. This preflight does not build or deploy the assignment image. If it fails, preserve the printed log path and inspect the log before retrying.
+
+Use explicit `--context mlops-assignment` to avoid mutating other clusters. The bootstrap uses `minikube start -p mlops-assignment --driver=docker --cpus=4 --memory=6144`; after preparing and loading a verified image, run `make deploy-minikube`.
 
 The script enables Traefik, verifies its IngressClass, loads the provided image, applies the overlay, waits for application rollout, applies internal Prometheus and waits for its rollout. Use unique model/version image tags for subsequent releases; avoid reusing `local` with unchanged pods.
 

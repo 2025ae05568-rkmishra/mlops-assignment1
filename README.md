@@ -43,6 +43,8 @@ MLflow tracks every executed candidate configuration, fold metrics, lineage, art
 
 ## Docker and local Kubernetes
 
+On a Rocky Linux 9 lab VM, clone the repository and run `bash scripts/bootstrap_rocky9.sh` as your regular user first. It installs Python 3.11 and kubectl, starts/checks the `mlops-assignment` Minikube profile, and saves a timestamped troubleshooting log in `~/mlops-bootstrap-logs/`. It does not train, build, or deploy the assignment image. See [local access instructions](docs/deployment-minikube.md).
+
 ```bash
 make docker-build
 make docker-smoke
