@@ -24,4 +24,4 @@ Local Kubernetes is fully permitted. The PDF does not require a paid cloud deplo
 **Source reconciliation result:** All nine categories and weights match the PDF. The 10-page report and permitted formats are confirmed. The user explicitly selected the actual Cleveland schema and instructed that the PDF's “14+ features” wording be ignored for this decision (Section 6.1). This is a recorded override, not an unresolved blocker. Requirements not stated in this PDF remain unspecified.
 
 
-Implementation artifacts and actual status: see [progress](progress.md), [submission checklist](submission-checklist.md), `reports/evidence/` and `reports/metrics/`. Remote CI and final submission remain pending.
+Implementation artifacts and actual status: see [progress](progress.md), [submission checklist](submission-checklist.md), `reports/evidence/` and `reports/metrics/`. Historical remote CI evidence is retained; the current BITS release and final submission remain pending until docs/submission-checklist.md is completed.

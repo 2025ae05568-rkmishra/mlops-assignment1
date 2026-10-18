@@ -1,9 +1,12 @@
+import argparse
 import subprocess
 from pathlib import Path
 
 from heart_disease.common.io import now, read_json, write_json
 
-out = Path("reports/evidence/runtime")
+parser = argparse.ArgumentParser()
+parser.add_argument("--output", default="reports/evidence/runtime")
+out = Path(parser.parse_args().output)
 out.mkdir(parents=True, exist_ok=True)
 for name, command in {
     "resources": [
@@ -58,7 +61,7 @@ for name, command in {
     result = subprocess.run(command, capture_output=True, text=True, check=True)
     (out / f"{name}.txt").write_text(result.stdout)
 write_json(
-    "reports/evidence/index.json",
+    out / "index.json",
     {
         "captured_at": now(),
         "model": read_json("artifacts/model/current/manifest.json"),

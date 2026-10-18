@@ -15,4 +15,4 @@ flowchart LR
   P --> V[Private API metrics dashboard]
 ```
 
-The API performs validated inference using the same fitted preprocessing/model pipeline. Requests never train models. Metrics and logs describe service behavior; no online accuracy measurement or automatic retraining is claimed. CI trains/tests/packages before container testing. Local CD is a context-scoped script. Conditional GKE remains outside the current local implementation.
+The API performs validated inference using the same fitted preprocessing/model pipeline. Requests never train models. Metrics and logs describe service behavior; no online accuracy measurement or automatic retraining is claimed. CI trains/tests/packages before container testing. CD runs on the external BITS Rocky Linux VM from a verified GitHub release artifact. Private reviewer access uses SSH forwarding to Traefik Ingress. Prometheus and the dashboard remain internal. See deployment-bits.md for evidence capture and final reporting.

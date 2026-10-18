@@ -1,3 +1,7 @@
+# Current submission target: BITS VM
+
+The workstation verification below is historical. BITS execution and final submission are pending until the [BITS checklist](submission-checklist.md) is completed. The new workflow captures one selected release and builds the report from its actual VM evidence.
+
 # Implementation progress
 
 The design is ready for implementation with the user-approved Cleveland schema: 13 predictors and binary target derived from `num > 0`. Design coverage is distinct from measured implementation success.
@@ -25,4 +29,4 @@ The design is ready for implementation with the user-approved Cleveland schema: 
 
 ## Final report
 
-`output/pdf/2025ae05568-mlops-final-report.pdf` contains exactly ten pages. Evidence details are in `reports/evidence/final-verification.json`. The student confirmed that the video has not yet been recorded.
+The historical `output/pdf/historical/2025ae05568-workstation-report.pdf` contains exactly ten pages. The BITS final report is generated only after current evidence and the recording are supplied. Evidence details are in `reports/evidence/final-verification.json`. The student confirmed that the video has not yet been recorded.

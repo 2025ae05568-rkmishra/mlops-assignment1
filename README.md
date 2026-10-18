@@ -4,6 +4,8 @@ This repository contains an end-to-end MLOps assignment using the UCI processed 
 
 Repository: <https://github.com/2025ae05568-rkmishra/mlops-assignment1>
 
+> **Submission workflow:** Follow [BITS VM submission and evidence capture](docs/deployment-bits.md). The selected target is BITS, and the final report must be built from its captured release. Historical workstation evidence is retained separately.
+
 ## Fast path: deploy on a Rocky Linux 9 BITS lab VM
 
 The GitHub release workflow builds and smoke-tests the AMD64 application image. The VM downloads that image and runs it in Minikube; it does not need to train or build the model locally.
@@ -80,32 +82,67 @@ Use a Rocky Linux 9 **x86_64/AMD64** VM with:
    kubectl --context mlops-assignment -n mlops-assignment get deployment/prometheus
    ```
 
-   Wait for two API replicas and Prometheus to be ready. The runner already tests prediction via Ingress. For manual access and troubleshooting, see [Minikube deployment and access](docs/deployment-minikube.md).
+   Wait for two API replicas and Prometheus to be ready. The runner already tests prediction via Ingress. For persistent private access, run `bash scripts/open_vm_access.sh` on the VM and follow [BITS access and submission](docs/deployment-bits.md).
 
-### View the monitoring dashboard
+### Open the deployed API, dashboard and MLflow
 
-Prometheus runs **inside Minikube**; do not install Grafana separately. The project includes a Python dashboard that reads Prometheus metrics.
+After `bash scripts/run_lab_deployment.sh` finishes successfully, run this **on the BITS VM**, from the repository directory:
 
-1. In a VM terminal, forward Prometheus:
+```bash
+bash scripts/open_vm_access.sh
+# Equivalent: make vm-access
+```
 
-   ```bash
-   kubectl --context mlops-assignment -n mlops-assignment \
-     port-forward svc/prometheus 9090:9090
-   ```
+Keep this terminal running while reviewing, taking screenshots or recording the video. The script starts the Traefik API port-forward, internal Prometheus port-forward, monitoring dashboard and a view of the downloaded release's MLflow experiments. Do not also start `make dashboard`, `make mlflow` or separate forwards on these ports; stop any existing ones before running this script.
 
-2. In another VM terminal, start the dashboard:
+| View | Open on the BITS VM desktop |
+|---|---|
+| Monitoring dashboard | http://127.0.0.1:8090 |
+| Selected release's MLflow experiments | http://127.0.0.1:5000 |
+| API through Traefik Ingress | http://127.0.0.1:8081 with `Host: heart-disease.test` |
 
-   ```bash
-   make dashboard
-   ```
+In a **second VM terminal**, test prediction and generate dashboard traffic:
 
-3. Open `http://127.0.0.1:8090` on the VM. To view it from your workstation, keep the dashboard and port-forward running, then create an SSH tunnel from the workstation:
+```bash
+.venv/bin/python scripts/smoke_api.py --url http://127.0.0.1:8081 --host heart-disease.test
+.venv/bin/python scripts/generate_traffic.py --duration 60
+```
 
-   ```bash
-   ssh -L 8090:127.0.0.1:8090 -L 9090:127.0.0.1:9090 USER@VM
-   ```
+The smoke test sends valid and invalid requests. Open the dashboard during traffic generation and allow at least two scrapes before capturing graphs. For browser API docs, map `heart-disease.test` to `127.0.0.1` on the viewing machine and open http://heart-disease.test:8081/docs; plain localhost requests do not match the Ingress host rule.
 
-   Open `http://127.0.0.1:8090` on the workstation. Generate requests and allow at least two Prometheus scrapes for useful graphs. Metrics history is ephemeral; save screenshots and evidence before stopping Minikube.
+If viewing from your workstation instead of the BITS desktop, keep the VM script running and open a **workstation terminal**:
+
+```bash
+ssh -N -L 8081:127.0.0.1:8081 -L 8090:127.0.0.1:8090 -L 5000:127.0.0.1:5000 USER@VM
+```
+
+Replace `USER@VM` with your actual BITS SSH destination and use its required VPN/jump host, if any. Then open the same dashboard and MLflow URLs on your workstation. This step is unnecessary when using the BITS VM desktop directly.
+
+Press **Ctrl-C** in the VM script terminal to stop its access processes. The Kubernetes deployment remains running. Troubleshooting logs are under `reports/evidence/runtime/access/`.
+
+### Capture evidence and build the report
+
+The deployment runner automatically calls `scripts/capture_submission.py`; you do not normally run it manually. Find the selected evidence directory with:
+
+```bash
+cat reports/evidence/runtime/latest-submission.txt
+```
+
+Add the four current-release screenshots (`ci.png`, `mlflow.png`, `deployment.png`, `monitoring.png`) to that directory's `screenshots/` folder, and add your tested access instructions as `reviewer-access.md`. Record the pipeline and verify the video's sharing permissions. Then run on the VM:
+
+```bash
+make report VIDEO_URL='https://your-reviewer-accessible-recording-link'
+```
+
+The final report is written to `output/pdf/2025ae05568-mlops-final-report.pdf`. It requires the captured BITS evidence, screenshots, access instructions and recording link. Use `make report-draft` only for a visibly marked layout draft before the final inputs exist.
+
+| New script | When it runs |
+|---|---|
+| `scripts/open_vm_access.sh` | You run it after successful deployment; keep its terminal open. |
+| `scripts/capture_submission.py` | Called automatically by `scripts/run_lab_deployment.sh` to capture and validate release/VM evidence. |
+| `scripts/serve_release_mlflow.py` | Called automatically by `scripts/open_vm_access.sh` to show the downloaded release's experiments. |
+
+See [the full BITS submission workflow](docs/deployment-bits.md) for screenshot contents, reviewer access and final submission checks. Export evidence before stopping or replacing the VM; monitoring history is ephemeral.
 
 ## Run the data, training, and test pipeline
 
@@ -192,12 +229,12 @@ The assignment PDF asks for each item below. Paths point to the implementation/e
 | JSON prediction API and isolated container proof | `src/heart_disease/api/`, `Dockerfile`, `tests/fixtures/valid_request.json`, `make docker-smoke` |
 | Kubernetes deployment, Ingress, endpoint proof | `deploy/k8s/`, `scripts/deploy_minikube.sh`, `scripts/run_lab_deployment.sh`, `reports/evidence/` |
 | Request logging and monitoring/dashboard | `src/heart_disease/api/`, `deploy/monitoring/`, `scripts/monitoring_dashboard.py`, `reports/evidence/screenshots/monitoring/` |
-| Setup, modeling, architecture, deployment and report | This README, `docs/architecture.md`, other `docs/`, `output/pdf/2025ae05568-mlops-final-report.pdf` |
+| Setup, modeling, architecture, deployment and report | This README, `docs/architecture.md`, other `docs/`, `make report` after BITS evidence capture; see `docs/deployment-bits.md` |
 | Local API access instructions and short pipeline video | [Minikube access instructions](docs/deployment-minikube.md), [recording outline](docs/video-script.md), [video link placeholder](docs/video-link.md) |
 
 The assignment permits **local Kubernetes** and local access instructions when the API is not public; paid cloud deployment and a public URL are not required for this chosen path. The overall architecture is in [docs/architecture.md](docs/architecture.md), progress and measured evidence in [docs/progress.md](docs/progress.md), and the remaining student/submission checks in [docs/submission-checklist.md](docs/submission-checklist.md).
 
-The included report is ten pages, but **review it before submission**. Its current PDF and report generator contain links and run details for the previous GitHub repository; they are not updated automatically by this deployment flow. Update the report source with the new repository URL and the exact CI/release evidence you verified, then rebuild with `make report` when the required verification evidence, screenshots, and extracted CI artifact are available. The video must be recorded by the student: demonstrate the actual pipeline, identify the repository and model version, explain data/EDA and model selection, show CI and container verification, inspect Kubernetes/Ingress, exercise valid and invalid requests, show monitoring/logs, and explain design choices. Do not present unrun steps as completed work; independently review the PDF and follow academic integrity requirements.
+The earlier workstation report is historical and is retained under `output/pdf/historical/`. `make report-draft` creates a clearly marked ten-page layout draft. After the BITS deployment, capture the four current-release screenshots, add tested reviewer access instructions, record the pipeline, then run `make report VIDEO_URL='https://your-recording-link'`. The generator checks the selected release evidence and refuses incomplete final inputs. Follow [the submission workflow](docs/deployment-bits.md) and [checklist](docs/submission-checklist.md); the student must review the final PDF and explain the implementation independently.
 
 ## GitHub Actions
 

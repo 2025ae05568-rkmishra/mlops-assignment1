@@ -45,9 +45,14 @@ log_file="$log_dir/lab-deployment-$(date +%Y%m%d-%H%M%S).log"
 exec > >(tee -a "$log_file") 2>&1
 
 port_forward_pid=""
+prometheus_pid=""
 port_forward_log="$log_dir/traefik-port-forward-$(date +%Y%m%d-%H%M%S).log"
 
 cleanup() {
+  if [[ -n "$prometheus_pid" ]]; then
+    kill "$prometheus_pid" 2>/dev/null || true
+    wait "$prometheus_pid" 2>/dev/null || true
+  fi
   if [[ -n "$port_forward_pid" ]] && kill -0 "$port_forward_pid" 2>/dev/null; then
     kill "$port_forward_pid" 2>/dev/null || true
     wait "$port_forward_pid" 2>/dev/null || true
@@ -248,6 +253,9 @@ step "Verify release archive checksum" \
   _ "$artifact_root"
 step "Load release image into Docker" docker load -i "$archive_path"
 image="heart-disease-api:${commit_sha}"
+release_image="heart-disease-api:${commit_sha}-${run_id}-${run_attempt}"
+step "Give the verified release a unique deployment tag" docker tag "$image" "$release_image"
+image="$release_image"
 step "Verify loaded image" docker image inspect "$image" --format '{{.Id}} {{.Os}}/{{.Architecture}}'
 
 bundle_manifest="$(find "$artifact_root" -type f -path '*/artifacts/model/current/manifest.json' -print -quit)"
@@ -296,9 +304,11 @@ done
 }
 printf 'Ingress /ready succeeded through Traefik.\n'
 
+expected_version="$("$root/.venv/bin/python" -c 'import json; print(json.load(open("artifacts/model/current/manifest.json"))["model_version"])')"
 step "Smoke-test valid and invalid API requests through Ingress" \
   "$root/.venv/bin/python" scripts/smoke_api.py \
-  --url http://127.0.0.1:8081 --host heart-disease.test --requests 20
+  --url http://127.0.0.1:8081 --host heart-disease.test --requests 20 \
+  --expected-version "$expected_version"
 metrics_status="$(
   curl --silent --output /dev/null --write-out '%{http_code}' \
     -H 'Host: heart-disease.test' http://127.0.0.1:8081/metrics
@@ -308,16 +318,37 @@ metrics_status="$(
   exit 1
 }
 printf 'Ingress /metrics check: correctly blocked (HTTP %s).\n' "$metrics_status"
+printf '\n== Capture selected-release submission evidence ==\n'
+kubectl --context "$profile" -n mlops-assignment \
+  port-forward --address 127.0.0.1 svc/prometheus 9090:9090 \
+  >"$log_dir/prometheus-forward.log" 2>&1 &
+prometheus_pid=$!
+prometheus_ready=0
+for attempt in {1..30}; do
+  kill -0 "$prometheus_pid" 2>/dev/null || { cat "$log_dir/prometheus-forward.log"; exit 1; }
+  if curl --silent --fail --max-time 2 http://127.0.0.1:9090/-/ready >/dev/null; then
+    prometheus_ready=1
+    break
+  fi
+  sleep 2
+done
+[[ "$prometheus_ready" -eq 1 ]] || { printf 'ERROR: Prometheus forwarding failed.\n' >&2; exit 1; }
+evidence_dir="$log_dir/submission-${run_id}-${run_attempt}-$(date +%Y%m%d-%H%M%S)"
+step "Capture and validate BITS evidence, model identity and monitoring" \
+  "$root/.venv/bin/python" scripts/capture_submission.py \
+  --release-root "$artifact_root" --output "$evidence_dir" \
+  --repository "$repo" --run-id "$run_id" --attempt "$run_attempt" --image "$image"
 cleanup
 port_forward_pid=""
-
-step "Collect deployment evidence" make evidence
+prometheus_pid=""
 
 printf '\nDeployment completed successfully.\n'
 printf 'Repository commit: %s\nRelease workflow run: %s\n' "$commit_sha" "$run_id"
 printf 'Workflow: https://github.com/%s/actions/runs/%s\n' "$repo" "$run_id"
 printf 'Image: %s\nLog: %s\n' "$image" "$log_file"
 printf 'Downloaded release artifact: %s\n' "$release_dir"
-printf 'Evidence: %s/reports/evidence/runtime\n' "$root"
+printf 'Submission evidence: %s\n' "$evidence_dir"
+printf 'For reviewer access and screenshots, run: bash scripts/open_vm_access.sh\n'
+printf 'Then follow docs/deployment-bits.md to record the video and build the final report.\n'
 printf 'To repeat on another VM, clone commit %s and run:\n' "$commit_sha"
 printf '  bash scripts/run_lab_deployment.sh --reuse-run %s\n' "$run_id"
