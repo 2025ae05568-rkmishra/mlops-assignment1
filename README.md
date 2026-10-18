@@ -147,7 +147,7 @@ Replace `USER@VM` with your actual BITS SSH destination and use its required VPN
 
 Press **Ctrl-C** in the VM script terminal to stop its access processes. The Kubernetes deployment remains running. Troubleshooting logs are under `reports/evidence/runtime/access/`.
 
-### Capture evidence and submit the report
+### How the evidence was captured from BITS VM for report generation
 
 The deployment runner automatically calls `scripts/capture_submission.py`; you do not normally run it manually. Find the selected evidence directory with:
 
@@ -157,7 +157,7 @@ cat reports/evidence/runtime/latest-submission.txt
 
 Add current-release screenshots (`ci.png`, `ci-artifact.png`, `mlflow.png`, `deployment.png`, `monitoring.png`) to that directory's `screenshots/` folder, and add your demonstrated access instructions as `reviewer-access.md`. The selected submission evidence has already been transferred to `reports/evidence/bits`.
 
-The completed ten-page report is provided at the repository root as `2025ae05568-mlops-final-report.pdf`. Submit that PDF and the separately exported recording. A hosted video link is optional when the video is submitted as a file. The evidence directory contains the metrics, figures, deployment checks and screenshots supporting the report.
+The completed ten-page report is provided at the repository root as `2025ae05568-mlops-final-report.pdf`. The evidence directory contains the metrics, figures, deployment checks and screenshots supporting the report.
 
 | New script | When it runs |
 |---|---|
@@ -165,7 +165,6 @@ The completed ten-page report is provided at the repository root as `2025ae05568
 | `scripts/capture_submission.py` | Called automatically by `scripts/run_lab_deployment.sh` to capture and validate release/VM evidence. |
 | `scripts/serve_release_mlflow.py` | Called automatically by `scripts/open_vm_access.sh` to show the downloaded release's experiments. |
 
-The screenshots should show the successful release job and downloadable artifact, selected MLflow parameters/metrics/artifacts, ready Kubernetes resources with valid/invalid Ingress responses, and a populated dashboard with both targets UP. Export evidence before stopping or replacing the VM; monitoring history is ephemeral. Package it from the VM repository root with `tar -czf ~/bits-evidence.tgz reports/evidence/runtime`. The copied runtime pointer contains a VM-specific absolute path; inspect the extracted snapshot directly on the Mac. A later deployment creates its own evidence and does not change the release documented in the submitted PDF.
 
 ### Pipeline video
 
@@ -313,7 +312,7 @@ The assignment PDF asks for each item below. Paths point to the implementation/e
 
 The assignment permits **local Kubernetes** and local access instructions when the API is not public; paid cloud deployment and a public URL are not required for this chosen path. See the architecture above and [validated BITS evidence](reports/evidence/bits/README.md).
 
-The final ten-page report uses the BITS evidence in `reports/evidence/bits` and the completed video. Submit the final PDF and existing MP4, commit/push the report and evidence, and verify the evaluator can access the deliverables and documented local testing path.
+The final ten-page report uses the BITS evidence in `reports/evidence/bits` and the completed video.
 
 ## GitHub Actions
 
