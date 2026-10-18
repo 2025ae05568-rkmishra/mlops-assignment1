@@ -497,7 +497,7 @@ def build(args):
             ["Container / deployment / monitoring", "Dockerfile; deploy/; scripts/"],
             [
                 "Evidence / report / access",
-                "reports/evidence/bits; output/pdf; docs/deployment-bits.md",
+                "reports/evidence/bits; output/pdf; README.md",
             ],
         ]
     )

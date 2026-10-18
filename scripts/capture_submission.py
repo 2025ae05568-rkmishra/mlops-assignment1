@@ -45,7 +45,7 @@ def capture(args):
             ).strip(),
             "archive_sha256": sha256(source / "artifacts/heart-disease-api.tar.gz"),
             "release_root": str(source),
-            "access_mode": "Private BITS VM; SSH tunnel to Traefik Ingress",
+            "access_mode": "Private BITS VM; localhost forwarding to Traefik Ingress",
         },
     )
     sample = read_json("tests/fixtures/valid_request.json")

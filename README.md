@@ -1,12 +1,12 @@
 # Heart Disease Prediction — MLOps Assignment 1
 
-This repository contains an end-to-end MLOps assignment using the UCI processed Cleveland heart-disease dataset. The implementation uses its actual 13 predictor fields and derives a binary target as `int(num > 0)`, following the student's selected schema rather than the assignment PDF's "14+ features" wording. This model is educational, has not been clinically validated, and must not guide diagnosis or treatment.
+This repository contains an end-to-end MLOps assignment using the UCI processed Cleveland heart-disease dataset.
 
 Repository: <https://github.com/2025ae05568-rkmishra/mlops-assignment1>
 
-> **Submission workflow:** Follow [BITS VM submission and evidence capture](docs/deployment-bits.md). The selected target is BITS, and the final report must be built from its captured release. Historical workstation evidence is retained separately.
+> **Submission workflow:** Follow the BITS deployment and access sequence below. The selected target is BITS, and the final report uses its captured release. The repository retains the selected BITS evidence.
 
-**Final submission:** [Ten-page BITS report](output/pdf/2025ae05568-mlops-final-report.pdf), [validated VM evidence and selected screenshots](reports/evidence/bits/README.md), [local API access instructions](reports/evidence/bits/reviewer-access.md), and [recording details](docs/video-link.md). The report uses release run **39107510102**; the video is submitted separately as `2025ae05568-mlops.mp4`.
+**Final submission:** [Ten-page BITS report](output/pdf/2025ae05568-mlops-final-report.pdf), [validated VM evidence and selected screenshots](reports/evidence/bits/README.md), [local API access instructions](reports/evidence/bits/reviewer-access.md), and the separately submitted `2025ae05568-mlops.mp4`. The report uses release run **39107510102**.
 
 ## Fast path: deploy on a Rocky Linux 9 BITS lab VM
 
@@ -18,7 +18,7 @@ The GitHub release workflow builds and smoke-tests the AMD64 application image. 
 
 Use a Rocky Linux 9 **x86_64/AMD64** VM with:
 
-- Docker running and usable by your account.
+- Git available to clone the repository, and Docker running and usable by your regular account.
 - Minikube installed; enough VM resources for a 4-CPU, 6-GiB Minikube profile.
 - Network access to GitHub Actions artifacts, Python package downloads, and container registries.
 - An account with `sudo` access for the bootstrap, plus GitHub access to dispatch workflows and download artifacts.
@@ -26,9 +26,13 @@ Use a Rocky Linux 9 **x86_64/AMD64** VM with:
 
 ### Run in this order
 
+For an existing checkout, use `cd ~/workspace/mlops-assignment1`, `git switch main`, and `git pull --ff-only` instead of cloning again. To view an already-working deployment, go directly to the access section below. The commands use `.venv/bin/python` explicitly, so activating the virtual environment is optional.
+
 1. **Clone the new repository and enter it.**
 
    ```bash
+   mkdir -p ~/workspace
+   cd ~/workspace
    git clone https://github.com/2025ae05568-rkmishra/mlops-assignment1.git
    cd mlops-assignment1
    git switch main
@@ -68,15 +72,17 @@ Use a Rocky Linux 9 **x86_64/AMD64** VM with:
    bash scripts/run_lab_deployment.sh
    ```
 
+   Before repeating deployment, stop any existing `open_vm_access.sh` session with Ctrl-C so ports 8081 and 9090 are available for the runner's checks.
+
    This one command checks the checkout and cluster, dispatches the **Package verified local-deployment release** workflow on GitHub, waits for its training/tests/image smoke test to succeed, downloads and checksum-verifies its image artifact, loads the image into Docker, deploys the API and Prometheus to Minikube, exercises valid and invalid API requests through Traefik Ingress, checks that `/metrics` is not publicly routed, and collects deployment evidence. It prints the workflow run ID and link when complete. Detailed logs and captured runtime evidence are under `reports/evidence/runtime/`.
 
-   For a replacement VM, clone/check out the **same commit** and reuse the successful **release workflow** run ID:
+   For a replacement VM, use a clean **main** checkout at the **same commit as current remote main**, and reuse a successful **release workflow** run for that commit:
 
    ```bash
    bash scripts/run_lab_deployment.sh --reuse-run RUN_ID
    ```
 
-   This downloads the existing artifact instead of starting a new build. GitHub retains release artifacts for 90 days. Do not use a CI run ID as the release run ID.
+   This downloads the existing artifact instead of starting a new build. GitHub retains release artifacts for 90 days. Do not use a CI run ID as the release run ID. The checkout, remote main and release commit must all match. Run `39107510102` belongs to the archived submission evidence; after main advances, use the default deployment command to build a new release.
 
 5. **Check the result.**
 
@@ -86,7 +92,23 @@ Use a Rocky Linux 9 **x86_64/AMD64** VM with:
    kubectl --context mlops-assignment -n mlops-assignment get deployment/prometheus
    ```
 
-   Wait for two API replicas and Prometheus to be ready. The runner already tests prediction via Ingress. For persistent private access, run `bash scripts/open_vm_access.sh` on the VM and follow [BITS access and submission](docs/deployment-bits.md).
+   Wait for two API replicas and Prometheus to be ready. The runner already tests prediction via Ingress. For persistent private access, run `bash scripts/open_vm_access.sh` on the VM and follow the access section below.
+
+### Traefik controller installation
+
+Step 4 calls `scripts/deploy_minikube.sh`, which automatically installs `deploy/traefik/controller.yaml` if `kube-system/traefik` is absent. The manifest supplies the controller's service account, RBAC, IngressClass `traefik`, Deployment and LoadBalancer Service on HTTP port 8081. The script waits for readiness before applying the application Ingress. No separate controller installation is needed in the normal sequence.
+
+To install the controller manually in an already-running `mlops-assignment` cluster, run these from the repository root:
+
+```bash
+kubectl --context mlops-assignment apply -f deploy/k8s/base/namespace.yaml
+kubectl --context mlops-assignment apply -f deploy/traefik/controller.yaml
+kubectl --context mlops-assignment -n kube-system rollout status deployment/traefik --timeout=300s
+kubectl --context mlops-assignment get ingressclass traefik
+kubectl --context mlops-assignment -n kube-system get svc traefik
+```
+
+Continue with the normal deployment command after the controller is ready. Existing controllers are reused; manual installation is an alternative to the automatic step. Keep the installed Minikube 1.35 and Kubernetes/kubectl 1.32 used on BITS.
 
 ### Open the deployed API, dashboard and MLflow
 
@@ -105,9 +127,10 @@ Keep this terminal running while reviewing, taking screenshots or recording the 
 | Selected release's MLflow experiments | http://127.0.0.1:5000 |
 | API through Traefik Ingress | http://127.0.0.1:8081 with `Host: heart-disease.test` |
 
-In a **second VM terminal**, test prediction and generate dashboard traffic:
+In a **second VM terminal**, enter the same repository directory, then test prediction and generate dashboard traffic. For the demonstrated VM checkout:
 
 ```bash
+cd ~/workspace/mlops-assignment1
 .venv/bin/python scripts/smoke_api.py --url http://127.0.0.1:8081 --host heart-disease.test
 .venv/bin/python scripts/generate_traffic.py --duration 60
 ```
@@ -146,7 +169,17 @@ The final report is written to `output/pdf/2025ae05568-mlops-final-report.pdf`. 
 | `scripts/capture_submission.py` | Called automatically by `scripts/run_lab_deployment.sh` to capture and validate release/VM evidence. |
 | `scripts/serve_release_mlflow.py` | Called automatically by `scripts/open_vm_access.sh` to show the downloaded release's experiments. |
 
-See [the full BITS submission workflow](docs/deployment-bits.md) for screenshot contents, reviewer access and final submission checks. Export evidence before stopping or replacing the VM; monitoring history is ephemeral.
+The screenshots should show the successful release job and downloadable artifact, selected MLflow parameters/metrics/artifacts, ready Kubernetes resources with valid/invalid Ingress responses, and a populated dashboard with both targets UP. Export evidence before stopping or replacing the VM; monitoring history is ephemeral. Package it from the VM repository root with `tar -czf ~/bits-evidence.tgz reports/evidence/runtime`. On the Mac, select the extracted snapshot directory explicitly; its copied runtime pointer still contains a VM-specific absolute path. For a new release's report, use `make report EVIDENCE_DIR="$(cat reports/evidence/runtime/latest-submission.txt)" VIDEO_FILE='/path/to/recording.mp4'` on the VM instead of selecting the archived submission snapshot.
+
+### Pipeline video
+
+The completed recording is `2025ae05568-mlops.mp4` (approximately 68 MB; 11 minutes 13 seconds), submitted separately. It covers the repository, successful CI and release artifact, MLflow results, Kubernetes/Ingress checks, monitoring and request logs. Keep the original MP4 locally; if using a hosted link, verify evaluator access. The recorded screen and both narration segments are already combined in this export.
+
+### Deployment troubleshooting
+
+For a controller failure, inspect `kubectl --context mlops-assignment -n kube-system logs deployment/traefik --tail=50`. For application failures, inspect `kubectl --context mlops-assignment -n mlops-assignment get events --sort-by=.lastTimestamp` and `kubectl --context mlops-assignment -n mlops-assignment logs -l app=heart-disease-api --prefix --tail=50`. Keep comma-separated resource types together as `pods,svc,ingress`.
+
+Ingress `/ready` and `/predict` need `Host: heart-disease.test`. HTTP 422 for deliberately invalid input and HTTP 404 for Ingress `/metrics` are expected. HTTP 503 requires checking pod/model readiness. Access failures are logged under `reports/evidence/runtime/access/`; stop the previous access process before reusing its ports. Generate traffic and allow at least two scrapes before expecting populated monitoring graphs. The release access script needs its VM runtime pointer and full downloaded release directory, including MLflow data; the committed report snapshot alone does not supply those live-access dependencies.
 
 ## Run the data, training, and test pipeline
 
@@ -170,7 +203,7 @@ make test
 
 The dataset archive and its member are SHA-256 pinned in `data/manifests/source-lock.json`. `make data` downloads the source if it is not cached, verifies its hashes, creates the cleaned dataset and deterministic split manifest, and fails if the upstream data changes. Do not silently regenerate the source lock.
 
-Preprocessing is part of the fitted cross-validation pipeline: median imputation for numeric features, mode imputation and one-hot encoding for categorical features, and scaling for Logistic Regression. A stratified 80/20 split and five shared training-only folds use seed 42. The search compares a DummyClassifier, six Logistic Regression configurations, and eighteen Random Forest configurations; model selection uses mean CV ROC-AUC with a 0.01 simplicity rule favoring Logistic Regression. The 0.5 threshold is fixed. Held-out test results do not drive tuning. See [training configuration](configs/training.yaml), [model card](docs/model-card.md), [selected BITS metrics](reports/evidence/bits/metrics/), and [selected BITS figures](reports/evidence/bits/figures/).
+Preprocessing is part of the fitted cross-validation pipeline: median imputation for numeric features, mode imputation and one-hot encoding for categorical features, and scaling for Logistic Regression. A stratified 80/20 split and five shared training-only folds use seed 42. The search compares a DummyClassifier, six Logistic Regression configurations, and eighteen Random Forest configurations; model selection uses mean CV ROC-AUC with a 0.01 simplicity rule favoring Logistic Regression. The 0.5 threshold is fixed. Held-out test results do not drive tuning. See [training configuration](configs/training.yaml), [selected model manifest](reports/evidence/bits/manifest.json), [selected BITS metrics](reports/evidence/bits/metrics/), and [selected BITS figures](reports/evidence/bits/figures/).
 
 New runs regenerate `reports/metrics/`, `reports/figures/` and runtime evidence as ignored working outputs. Submission results are preserved separately in `reports/evidence/bits/`; older Mac-generated results are excluded.
 
@@ -194,7 +227,33 @@ minikube start -p mlops-assignment --driver=docker --cpus=4 --memory=6144
 make deploy-minikube
 ```
 
-For the deployed API's Traefik route, Prometheus access, and dashboard, follow [BITS deployment and access](docs/deployment-bits.md). `make docker-build` packages the current local model, so train/package first if no verified model bundle is present.
+`make docker-build` packages the current local model, so train/package first if no verified model bundle is present. A locally built deployment does not create a downloaded GitHub release or its runtime pointer; use the manual access sequence below rather than `scripts/open_vm_access.sh`.
+
+After `make deploy-minikube`, open three separate terminals in the repository directory and keep each command running:
+
+```bash
+# Terminal 1: forward to the Traefik controller, preserving Ingress routing.
+kubectl --context mlops-assignment -n kube-system port-forward --address 127.0.0.1 svc/traefik 8081:8081
+```
+
+```bash
+# Terminal 2: private Prometheus access for the dashboard.
+kubectl --context mlops-assignment -n mlops-assignment port-forward --address 127.0.0.1 svc/prometheus 9090:9090
+```
+
+```bash
+# Terminal 3: private dashboard at http://127.0.0.1:8090.
+make dashboard
+```
+
+In a fourth repository terminal, run:
+
+```bash
+.venv/bin/python scripts/smoke_api.py --url http://127.0.0.1:8081 --host heart-disease.test
+.venv/bin/python scripts/generate_traffic.py --duration 60
+```
+
+Start `make mlflow` separately for this local training run's experiments at http://127.0.0.1:5000. This controller Service port-forward exercises the Ingress rules without requiring `minikube tunnel`. Stop the forwards/dashboard with Ctrl-C when finished.
 
 ## API and Docker
 
@@ -228,19 +287,19 @@ The assignment PDF asks for each item below. Paths point to the implementation/e
 | Requirement | Implementation / evidence |
 |---|---|
 | Data acquisition, cleaning, missing-value handling, EDA visualizations | `src/heart_disease/data/`, `data/README.md`, `data/processed/cleaned.csv`, `data/manifests/`, `notebooks/01_eda.ipynb`, `reports/evidence/bits/figures/` |
-| Feature engineering, at least two classifiers, tuning and CV metrics | `src/heart_disease/models/`, `configs/training.yaml`, `reports/evidence/bits/metrics/`, `docs/model-card.md` |
+| Feature engineering, at least two classifiers, tuning and CV metrics | `src/heart_disease/models/`, `configs/training.yaml`, `reports/evidence/bits/metrics/`, `reports/evidence/bits/manifest.json` |
 | Experiment tracking | `make mlflow`, `mlflow.db`, `mlruns/` |
 | Reusable model and clean requirements | `artifacts/model/` (generated), `requirements.txt`, `requirements-dev.txt` |
 | Unit tests and automated CI with logs/artifacts | `tests/`, `.github/workflows/ci.yml`, `.github/workflows/release.yml`, GitHub Actions run artifacts |
 | JSON prediction API and isolated container proof | `src/heart_disease/api/`, `Dockerfile`, `tests/fixtures/valid_request.json`, `make docker-smoke` |
 | Kubernetes deployment, Ingress, endpoint proof | `deploy/k8s/`, `scripts/deploy_minikube.sh`, `scripts/run_lab_deployment.sh`, `reports/evidence/bits/` |
 | Request logging and monitoring/dashboard | `src/heart_disease/api/`, `deploy/monitoring/`, `scripts/monitoring_dashboard.py`, `reports/evidence/bits/screenshots/monitoring.png` |
-| Setup, modeling, architecture, deployment and report | This README, `docs/architecture.md`, other `docs/`, `make report` after BITS evidence capture; see `docs/deployment-bits.md` |
-| Local API access instructions and short pipeline video | [BITS access instructions](reports/evidence/bits/reviewer-access.md), [recording details](docs/video-link.md) |
+| Setup, modeling, architecture, deployment and report | This README, `docs/architecture.md`, `make report` after BITS evidence capture |
+| Local API access instructions and short pipeline video | [BITS access instructions](reports/evidence/bits/reviewer-access.md), pipeline video section above; MP4 submitted separately |
 
 The assignment permits **local Kubernetes** and local access instructions when the API is not public; paid cloud deployment and a public URL are not required for this chosen path. See the [architecture](docs/architecture.md) and [validated BITS evidence](reports/evidence/bits/README.md).
 
-The final report uses the BITS evidence in `reports/evidence/bits` and the completed video. The generator checks release consistency, required screenshots and access instructions before producing exactly ten pages. Follow the [submission workflow](docs/deployment-bits.md). Submit the final PDF and existing MP4, commit/push the report and evidence, and verify the evaluator can access the deliverables and documented local testing path.
+The final report uses the BITS evidence in `reports/evidence/bits` and the completed video. The generator checks release consistency, required screenshots and access instructions before producing exactly ten pages. Submit the final PDF and existing MP4, commit/push the report and evidence, and verify the evaluator can access the deliverables and documented local testing path.
 
 ## GitHub Actions
 

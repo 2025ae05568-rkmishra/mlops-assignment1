@@ -1,7 +1,9 @@
 """Exercise controller installation/reuse without a real cluster or host changes."""
 
+import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -77,3 +79,52 @@ def test_direct_controller_matches_existing_ingress_and_forwarding():
         p["name"] == "web" and p["containerPort"] == 8000 for p in spec["containers"][0]["ports"]
     )
     assert not any(r["kind"] == "CustomResourceDefinition" for r in resources)
+
+
+@pytest.mark.parametrize("rollout_fails", [False, True])
+def test_prometheus_bootstrap_uses_valid_queries_and_stops_on_failed_rollout(
+    tmp_path, rollout_fails
+):
+    source = Path("scripts/bootstrap_rocky9.sh").read_text()
+    start = source.index("install_prometheus() {\n")
+    end = source.index("\n}\n", start) + 3
+    function = source[start:end]
+    fakebin = tmp_path / "bin"
+    fakebin.mkdir()
+    log = tmp_path / "commands.jsonl"
+    kubectl = fakebin / "kubectl"
+    kubectl.write_text(
+        f"#!{sys.executable}\n"
+        "import json, os, sys\n"
+        "args = sys.argv[1:]\n"
+        "with open(os.environ['TEST_LOG'], 'a') as output:\n"
+        "    output.write(json.dumps(args) + '\\n')\n"
+        "if any('/' in arg and ',' in arg for arg in args):\n"
+        "    sys.exit(2)  # kubectl cannot mix TYPE/NAME with resource types.\n"
+        "if 'rollout' in args and os.environ['TEST_ROLLOUT_FAIL'] == 'yes':\n"
+        "    sys.exit(1)\n"
+    )
+    kubectl.chmod(0o755)
+    result = subprocess.run(
+        ["bash", "-c", "set -euo pipefail\n" + function + "\ninstall_prometheus\n"],
+        env={
+            **os.environ,
+            "PATH": str(fakebin) + os.pathsep + os.environ["PATH"],
+            "profile": "mlops-assignment",
+            "repo_root": str(Path.cwd()),
+            "TEST_LOG": str(log),
+            "TEST_ROLLOUT_FAIL": "yes" if rollout_fails else "no",
+        },
+        capture_output=True,
+        text=True,
+    )
+    commands = [json.loads(line) for line in log.read_text().splitlines()]
+    if rollout_fails:
+        assert result.returncode != 0
+        assert "Prometheus is ready" not in result.stdout
+        assert "rollout" in commands[-1]
+    else:
+        assert result.returncode == 0, result.stderr
+        queries = [args[args.index("get") + 1] for args in commands if "get" in args]
+        assert queries == ["nodes", "deployment/prometheus", "pods,svc"]
+        assert "Prometheus is ready" in result.stdout

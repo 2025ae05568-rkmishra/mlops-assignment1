@@ -17,4 +17,5 @@ kubectl --context "$context" -n mlops-assignment rollout status deployment/heart
 kubectl --context "$context" -n mlops-assignment apply -f deploy/monitoring/prometheus.yaml
 kubectl --context "$context" -n mlops-assignment rollout status deployment/prometheus --timeout=300s
 kubectl --context "$context" -n mlops-assignment get pods,svc,ingress
-printf 'Run in separate terminals: minikube -p mlops-assignment tunnel; kubectl --context mlops-assignment -n mlops-assignment port-forward svc/prometheus 9090:9090\n'
+printf 'BITS release access: bash scripts/open_vm_access.sh (keep running).\n'
+printf 'Locally built image: follow the manual Traefik/Prometheus forwards in README.md; the release-access script requires a captured GitHub release.\n'

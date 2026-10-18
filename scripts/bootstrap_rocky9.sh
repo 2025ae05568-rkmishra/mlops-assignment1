@@ -104,7 +104,8 @@ install_prometheus() {
   kubectl --context "$context" -n mlops-assignment \
     rollout status deployment/prometheus --timeout=300s
   kubectl --context "$context" -n mlops-assignment \
-    get deployment/prometheus,pods,svc -o wide
+    get deployment/prometheus -o wide
+  kubectl --context "$context" -n mlops-assignment get pods,svc -o wide
   printf 'Prometheus is ready in namespace mlops-assignment.\n'
 }
 

@@ -349,6 +349,7 @@ printf 'Image: %s\nLog: %s\n' "$image" "$log_file"
 printf 'Downloaded release artifact: %s\n' "$release_dir"
 printf 'Submission evidence: %s\n' "$evidence_dir"
 printf 'For reviewer access and screenshots, run: bash scripts/open_vm_access.sh\n'
-printf 'Then follow docs/deployment-bits.md to record the video and build the final report.\n'
-printf 'To repeat on another VM, clone commit %s and run:\n' "$commit_sha"
+printf 'Then follow README.md to record the video and build the final report.\n'
+printf 'To repeat on another VM, use a clean main checkout at %s while remote main still matches, then run:\n' "$commit_sha"
 printf '  bash scripts/run_lab_deployment.sh --reuse-run %s\n' "$run_id"
+printf 'If main has advanced, deploy a new release with bash scripts/run_lab_deployment.sh.\n'

@@ -24,7 +24,7 @@
     "prometheus_manifest": "6 YAML resources parsed",
     "captured_bits_release": "validated",
     "pdf_pages": 10,
-    "pdf_hash": "8e090683299d3fc3b356fcc6864cd6bab4e503ae566f5c68675cb982257f7ad6",
+    "pdf_hash": "3c711b977c70f1acc360aa5107aa9f6833af5db202061d4f8936235efeed5194",
     "screenshot_and_video_hashes": "matched submission-manifest.json",
     "documentation_links": "resolved"
   },
@@ -42,5 +42,6 @@
     "VM was not redeployed during this audit; Docker and Kubernetes execution proof is the validated captured release",
     "Fresh training used the installed environment and pinned cached raw source; it was not a new network installation",
     "The previously agreed original Cleveland 13-predictor schema is retained"
-  ]
+  ],
+  "report_documentation_reference": "README.md; local-only deployment guide excluded from Git"
 }

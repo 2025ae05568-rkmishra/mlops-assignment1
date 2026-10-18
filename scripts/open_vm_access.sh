@@ -40,7 +40,7 @@ done
 printf '\nPrivate access is ready. Keep this terminal running. Ctrl-C stops these access processes.\n'
 printf 'VM desktop: dashboard http://127.0.0.1:8090 ; MLflow http://127.0.0.1:5000\n'
 printf 'Workstation: ssh -N -L 8081:127.0.0.1:8081 -L 8090:127.0.0.1:8090 -L 5000:127.0.0.1:5000 USER@VM\n'
-printf 'Use Host: heart-disease.test for API requests; see docs/deployment-bits.md.\n'
+printf 'Use Host: heart-disease.test for API requests; see README.md.\n'
 while true; do
   for pid in "${pids[@]}"; do
     kill -0 "$pid" 2>/dev/null || { printf 'Access process exited; inspect %s/*.log\n' "$log_dir" >&2; exit 1; }

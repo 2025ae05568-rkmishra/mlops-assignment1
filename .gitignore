@@ -44,3 +44,6 @@ output/audio/
 /reports/evidence/*
 !/reports/evidence/bits/
 /docs/model-manifest.json
+/docs/deployment-bits.md
+/docs/model-card.md
+/docs/video-link.md
