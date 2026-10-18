@@ -72,6 +72,7 @@ cffi==2.1.1
 charset-normalizer==3.5.2
     # via
     #   -r requirements.txt
+    #   reportlab
     #   requests
 click==8.5.0
     # via
@@ -351,8 +352,10 @@ pexpect==4.9.0
     # via ipython
 pillow==12.3.0
     # via
+    #   -r requirements-dev.in
     #   -r requirements.txt
     #   matplotlib
+    #   reportlab
 pip-tools==7.6.2
     # via -r requirements-dev.in
 platformdirs==4.13.0
@@ -460,6 +463,8 @@ referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
+reportlab==4.5.1
+    # via -r requirements-dev.in
 requests==2.34.2
     # via
     #   -r requirements.txt

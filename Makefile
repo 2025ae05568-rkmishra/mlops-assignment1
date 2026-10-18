@@ -8,7 +8,7 @@ export OMP_NUM_THREADS := 1
 export OPENBLAS_NUM_THREADS := 1
 export MLFLOW_DISABLE_AGENT_HINT := 1
 
-.PHONY: help setup data eda train evaluate package lint unit integration test verify serve mlflow docker-build docker-smoke deploy-minikube smoke dashboard evidence
+.PHONY: help setup data eda train evaluate package lint unit integration test verify serve mlflow docker-build docker-smoke deploy-minikube smoke dashboard evidence report
 help:
 	@echo "setup -> data -> eda -> train -> package -> test -> docker-build -> docker-smoke -> deploy-minikube"
 setup:
@@ -50,3 +50,5 @@ dashboard:
 	$(PY) scripts/monitoring_dashboard.py
 evidence:
 	$(PY) scripts/collect_evidence.py
+report:
+	$(PY) scripts/build_final_report.py
