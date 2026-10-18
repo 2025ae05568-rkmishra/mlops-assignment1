@@ -43,7 +43,21 @@ MLflow tracks every executed candidate configuration, fold metrics, lineage, art
 
 ## Docker and local Kubernetes
 
-On a Rocky Linux 9 lab VM, clone the repository and run `bash scripts/bootstrap_rocky9.sh` as your regular user first. It installs Python 3.11 and kubectl, starts/checks the `mlops-assignment` Minikube profile, and saves a timestamped troubleshooting log in `~/mlops-bootstrap-logs/`. It does not train, build, or deploy the assignment image. See [local access instructions](docs/deployment-minikube.md).
+On a Rocky Linux 9 lab VM, clone the repository and run `bash scripts/bootstrap_rocky9.sh` as your regular user first. It installs Python 3.11, kubectl and GitHub CLI, starts/checks the `mlops-assignment` Minikube profile, and saves a timestamped troubleshooting log in `~/mlops-bootstrap-logs/`. It does not train, build, or deploy the assignment image.
+
+After authenticating GitHub CLI with `gh auth login --hostname github.com --web`, the end-to-end lab runner triggers the release build on GitHub Actions, downloads and verifies its image, deploys it to Minikube, smoke-tests Ingress, and collects evidence:
+
+```bash
+bash scripts/run_lab_deployment.sh
+```
+
+For another VM, check out the same commit and reuse the successful release artifact instead of rebuilding:
+
+```bash
+bash scripts/run_lab_deployment.sh --reuse-run RUN_ID
+```
+
+See [local access instructions](docs/deployment-minikube.md) for requirements, logs, and manual steps.
 
 ```bash
 make docker-build

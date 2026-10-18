@@ -58,6 +58,16 @@ python3.11 -m pip --version
 python3.11 -m venv "$tmp_dir/python-check"
 "$tmp_dir/python-check/bin/python" --version
 
+printf '\n== Install GitHub CLI for release workflow and artifact access ==\n'
+if ! command -v gh >/dev/null; then
+  sudo dnf install -y 'dnf-command(config-manager)'
+  if [[ ! -f /etc/yum.repos.d/gh-cli.repo ]]; then
+    sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+  fi
+  sudo dnf install -y gh
+fi
+gh --version
+
 printf '\n== Check Docker access ==\n'
 docker info --format 'Docker architecture={{.Architecture}} CPUs={{.NCPU}} memory={{.MemTotal}} bytes'
 
