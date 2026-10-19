@@ -293,9 +293,9 @@ flowchart LR
 
 The API uses the fitted preprocessing/model pipeline and never trains during a request. GitHub Actions trains, tests and packages before container verification; the BITS VM deploys the verified release. The demonstrated access path is the authorized BITS remote desktop with a VM-local Traefik forward. Request logs and metrics describe service behavior.
 
-## Assignment deliverables and evidence
+## Deliverables and evidence
 
-The assignment PDF asks for each item below. Paths point to the implementation/evidence in this repository:
+ Paths point to the implementation/evidence in this repository:
 
 | Requirement | Implementation / evidence |
 |---|---|
@@ -310,9 +310,6 @@ The assignment PDF asks for each item below. Paths point to the implementation/e
 | Setup, modeling, architecture, deployment and report | This README and `2025ae05568-mlops-final-report.pdf` |
 | Local API access instructions and short pipeline video | [BITS access instructions](reports/evidence/bits/reviewer-access.md), pipeline video section above; MP4 submitted separately |
 
-The assignment permits **local Kubernetes** and local access instructions when the API is not public; paid cloud deployment and a public URL are not required for this chosen path. See the architecture above and [validated BITS evidence](reports/evidence/bits/README.md).
-
-The final ten-page report uses the BITS evidence in `reports/evidence/bits` and the completed video.
 
 ## GitHub Actions
 
@@ -321,15 +318,6 @@ The final ten-page report uses the BITS evidence in `reports/evidence/bits` and 
 
 The deployment runner requires the local checkout to be clean and exactly match pushed `main`. Push changes before invoking it. A successful CI run is not the same as a release run: use the release workflow ID with `--reuse-run`.
 
-## Stop and preserve work
-
-Save runtime logs, screenshots, report, and any untracked model/evidence files to persistent storage before switching VMs or deleting the cluster. Then stop Minikube:
-
-```bash
-minikube stop -p mlops-assignment
-```
-
-Stop any port-forward, dashboard, or tunnel terminals separately. `minikube delete -p mlops-assignment` deletes this project's cluster and should only be used after preserving needed evidence. A Minikube cluster and local Docker images are VM-local; GitHub code and unexpired release artifacts can be fetched again on a replacement VM.
 
 ## Data attribution
 
